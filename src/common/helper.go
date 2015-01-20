@@ -55,6 +55,14 @@ func CompareFilename(first string, second string) float32 {
 	havingPercentage := computeHavingPercentage(first, second)
 	missingPercentage := computeMissingWordPercentage(first, second)
 
+	// TODO FIXME This isn't correcly working as the one
+	// not having enough words but the good ones are better match
+	// than ones having enough words.
+	// Example:
+	// For: Castlevania Aria Of Sorrow
+	// 'Castlevania' is a better match than
+	// 'Castlevania Aria of'
+
 	return havingPercentage - missingPercentage
 }
 
