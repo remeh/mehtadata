@@ -6,6 +6,8 @@ package thegamesdb
 
 import (
 	"encoding/xml"
+	"strconv"
+	"strings"
 
 	"model"
 )
@@ -32,7 +34,7 @@ type GetGameGame struct {
 }
 
 type GetGameGenres struct {
-	Genre []string `xml:"genre"`
+	Genres []string `xml:"genre"`
 }
 
 type GetGameImages struct {
@@ -56,4 +58,29 @@ type GetGameScreenshot struct {
 	XMLName  xml.Name `xml:"screenshot"`
 	Thumb    string   `xml:"thumb"`
 	Original string   `xml:"original"`
+}
+
+func (gg GetGame) ToGameinfo() model.Gameinfo {
+	g := gg.Game
+
+	genre := ""
+	genres := g.Genres.Genres
+	if len(genres) > 0 {
+		genre = strings.Join(genres, ", ")
+	}
+
+	rating := 0.0
+	rating, _ = strconv.ParseFloat(g.Rating, 32)
+
+	return model.Gameinfo{
+		Title:       g.GameTitle,
+		Platform:    g.Platform,
+		Publisher:   g.Publisher,
+		Developer:   g.Developer,
+		ReleaseDate: g.ReleaseDate,
+		// TODO paths for screenshots etc.
+		Description: g.Overview,
+		Genres:      genre,
+		Rating:      float32(rating),
+	}
 }
