@@ -13,6 +13,5 @@ type Gameinfo struct {
 	CoverPath       string
 	ScreenshotPaths []string
 	FanartPaths     []string
-	ThumbnailPaths  []string
 	Rating          float32
 }

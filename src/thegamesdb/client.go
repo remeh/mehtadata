@@ -102,7 +102,7 @@ func (c *Client) Find(name string, platform Platform) (Gameinfo, error) {
 		return Gameinfo{}, err
 	}
 
-	return gotGame.ToGameinfo(), nil
+	return gotGame.ToGameinfo(name), nil
 }
 
 func (c *Client) findSome(list Matches, platform Platform) []GetGame {

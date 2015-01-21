@@ -1,9 +1,49 @@
 package common
 
 import (
+	"io/ioutil"
+	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
+
+// Download downlads the given url and saves it to
+// name+prefix file of the current dir.
+func Download(url string, name string, suffix string) (string, error) {
+	// http call
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	// read the content
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Opens the file
+	file, err := os.Create(name + suffix)
+	if err != nil {
+		return "", err
+	}
+
+	// Writes and closes the file
+	_, err = file.Write(data)
+	if err != nil {
+		return "", err
+	}
+	err = file.Close()
+	if err != nil {
+		return "", err
+	}
+
+	return name + suffix, nil
+}
 
 // Removes everything between (), [], {}
 // FIXME Is it doable in one regexp ?
