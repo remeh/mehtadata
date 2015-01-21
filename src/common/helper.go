@@ -22,7 +22,7 @@ func ClearName(name string) string {
 
 	res = RemoveSpecialChars(res)
 
-	return res
+	return strings.Trim(res, " ")
 }
 
 // Remove the special chars from the given string
@@ -37,6 +37,11 @@ func RemoveSpecialChars(s string) string {
 	for i := 0; i < len(specialChars); i++ {
 		result = strings.Replace(result, string(specialChars[i]), " ", -1)
 	}
+
+	// Replace the double spaces that the previous commands could have been created.
+	st := "\\s{2,}"
+	reg, _ := regexp.Compile(st)
+	result = reg.ReplaceAllString(result, " ")
 
 	return result
 }
@@ -53,41 +58,19 @@ func CompareFilename(first string, second string) float32 {
 	// The idea is to split by spaces and look how much of the "words"
 	// of the subtitles filename we can find in the video filename
 	havingPercentage := computeHavingPercentage(first, second)
-	missingPercentage := computeMissingWordPercentage(first, second)
 
-	// TODO FIXME This isn't correcly working as the one
-	// not having enough words but the good ones are better match
-	// than ones having enough words.
-	// Example:
-	// For: Castlevania Aria Of Sorrow
-	// 'Castlevania' is a better match than
-	// 'Castlevania Aria of'
-
-	return havingPercentage - missingPercentage
+	return havingPercentage
 }
 
-// Compute the percentage of word matching from subtitle to video filename
-func computeHavingPercentage(filename string, subtitleName string) float32 {
-	words := strings.Split(subtitleName, " ")
+// Compute the percentage of words matching : how many words are in second that exists in first.
+func computeHavingPercentage(first string, second string) float32 {
+	words := strings.Split(second, " ")
 	found := 0
 	for _, word := range words {
-		if strings.Contains(filename, word) {
+		if strings.Contains(first, word) {
 			found++
 		}
 	}
 	havingPercentage := float32(found) / float32(len(words))
 	return havingPercentage
-}
-
-// Compute the percentage of word missing from the subtitle filename.
-func computeMissingWordPercentage(filename string, subtitleName string) float32 {
-	words := strings.Split(filename, " ")
-	found := 0
-	for _, word := range words {
-		if strings.Contains(subtitleName, word) {
-			found++
-		}
-	}
-	missingPercentage := 1.0 - (float32(found) / float32(len(words)))
-	return missingPercentage
 }

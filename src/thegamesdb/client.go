@@ -108,7 +108,6 @@ func (c *Client) Find(name string, platform Platform) (Gameinfo, error) {
 func (c *Client) findSome(list Matches, platform Platform) []GetGame {
 	// Asynchronously get information for the games
 	// We need many to propose something.
-	// TODO refactoring
 	var waitGroup sync.WaitGroup
 	results := make([]GetGame, 0)
 	for i, _ := range list {
@@ -168,7 +167,7 @@ func (c *Client) findBestMatches(name string, platform Platform, gamesList GetGa
 	// iter through the results of the search
 	// ands assigns them a rating.
 	for _, v := range gamesList.Games {
-		rating := common.CompareFilename(name, v.GameTitle)
+		rating := common.CompareFilename(v.GameTitle, name)
 		results = append(results, Match{Game: v, Rating: rating})
 
 		// stop if we have enough
