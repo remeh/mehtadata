@@ -89,17 +89,17 @@ func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
 	for i, v := range gg.Game.Images.Fanarts {
 		wg.Add(1)
 
-		go func(wg *sync.WaitGroup, i int) {
+		go func(wg *sync.WaitGroup, path string, i int) {
 			defer wg.Done()
 
-			ext := filepath.Ext(v.Original)
-			filename, err := common.Download(gg.BaseImageURL+v.Original, gameFilename, "-fanart-"+strconv.Itoa(i)+ext)
+			ext := filepath.Ext(path)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext)
 			if err != nil {
-				log.Println("[err] While downloading ", gg.BaseImageURL+v.Original, ":", err.Error())
+				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
 				fanarts = append(fanarts, filename)
 			}
-		}(&wg, i)
+		}(&wg, v.Original, i)
 	}
 
 	// screenshots
@@ -108,17 +108,17 @@ func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
 	for i, v := range gg.Game.Images.Screenshots {
 		wg.Add(1)
 
-		go func(wg *sync.WaitGroup, i int) {
+		go func(wg *sync.WaitGroup, path string, i int) {
 			defer wg.Done()
 
-			ext := filepath.Ext(v.Original)
-			filename, err := common.Download(gg.BaseImageURL+v.Original, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext)
+			ext := filepath.Ext(path)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext)
 			if err != nil {
-				log.Println("[err] While downloading ", gg.BaseImageURL+v.Original, ":", err.Error())
+				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
 				screenshots = append(screenshots, filename)
 			}
-		}(&wg, i)
+		}(&wg, v.Original, i)
 	}
 
 	// look for a front cover

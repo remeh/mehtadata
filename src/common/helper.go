@@ -104,10 +104,10 @@ func CompareFilename(first string, second string) float32 {
 
 // Compute the percentage of words matching : how many words are in second that exists in first.
 func computeHavingPercentage(first string, second string) float32 {
-	words := strings.Split(second, " ")
+	words := strings.Split(first, " ")
 	found := 0
 	for _, word := range words {
-		if strings.Contains(first, word) {
+		if strings.Contains(second, word) {
 			found++
 		}
 	}
