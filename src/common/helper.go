@@ -61,6 +61,7 @@ func ClearName(name string) string {
 	res = reg.ReplaceAllString(res, "")
 
 	res = RemoveSpecialChars(res)
+	res = strings.ToLower(res)
 
 	return strings.Trim(res, " ")
 }
@@ -98,8 +99,9 @@ func CompareFilename(first string, second string) float32 {
 	// The idea is to split by spaces and look how much of the "words"
 	// of the subtitles filename we can find in the video filename
 	havingPercentage := computeHavingPercentage(first, second)
+	missingPercentage := computeHavingPercentage(second, first)
 
-	return havingPercentage
+	return missingPercentage + havingPercentage
 }
 
 // Compute the percentage of words matching : how many words are in second that exists in first.
