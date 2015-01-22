@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
@@ -55,9 +54,6 @@ func main() {
 
 	client := thegamesdb.NewClient()
 	for _, filename := range filenames {
-		//client.Find(filename, "nope")
-		fmt.Println(filename)
+		client.Find(filename, "nope")
 	}
-
-	client.Find("Castlevania: Aria Of", "nope")
 }
