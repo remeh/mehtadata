@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
+	"common"
+	"model"
 	"thegamesdb"
 )
 
@@ -20,7 +23,7 @@ func ParseFlags() Flags {
 	flags := Flags{}
 
 	flag.StringVar(&(flags.Input), "input", "", "Input directories (directory containing games)")
-	flag.StringVar(&(flags.Output), "output", "", "Output directories for images and cover")
+	flag.StringVar(&(flags.Output), "output", "./", "Output directories for images and cover")
 
 	flag.Parse()
 	return flags
@@ -51,9 +54,22 @@ func main() {
 	flags := ParseFlags()
 
 	filenames := lookForFiles(flags.Input)
+	gamesinfo := model.NewGamesinfo()
 
 	client := thegamesdb.NewClient()
 	for _, filename := range filenames {
-		client.Find(filename, "nope")
+		gameinfo, err := client.Find(filename, "nope", flags.Output)
+		if err != nil {
+			fmt.Println("[err] Unable to find info for the game:", filename)
+			continue
+		}
+		gamesinfo.AddGame(gameinfo)
+	}
+
+	data, err := common.Encode(gamesinfo)
+	if err != nil {
+		fmt.Println("[err] Failed to encode the final xml:", err.Error())
+	} else {
+		fmt.Println(string(data))
 	}
 }

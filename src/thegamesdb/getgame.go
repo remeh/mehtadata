@@ -55,7 +55,7 @@ type GetGameFanart struct {
 type GetGameBoxart struct {
 	Side   string `xml:"side,attr"`
 	Thumb  string `xml:"thumb,attr"`
-	Boxart string `xml:",innerxml"` // NOTE ",innerxml" ?
+	Boxart string `xml:",innerxml"`
 }
 
 type GetGameScreenshot struct {
@@ -67,7 +67,7 @@ type GetGameScreenshot struct {
 // ToGameinfo converts the GetGame to a Gameinfo.
 // During the conversion, it downloads the whole set of available images.
 // FIXME A bit of refactoring could be done here... 2015-01-21 - remy
-func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
+func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string) model.Gameinfo {
 	g := gg.Game
 
 	// misc fields
@@ -97,7 +97,7 @@ func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
-				fanarts = append(fanarts, filename)
+				fanarts = append(fanarts, outputDirectory+filename)
 			}
 		}(&wg, v.Original, i)
 	}
@@ -116,7 +116,7 @@ func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
-				screenshots = append(screenshots, filename)
+				screenshots = append(screenshots, outputDirectory+filename)
 			}
 		}(&wg, v.Original, i)
 	}
@@ -143,7 +143,7 @@ func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+coverURL, ":", err.Error())
 			} else {
-				cover = filename
+				cover = outputDirectory + filename
 			}
 		}(&wg)
 	}
@@ -151,6 +151,7 @@ func (gg GetGame) ToGameinfo(gameFilename string) model.Gameinfo {
 	wg.Wait()
 
 	return model.Gameinfo{
+		Filepath:        outputDirectory + gameFilename,
 		Title:           g.GameTitle,
 		Platform:        g.Platform,
 		Publisher:       g.Publisher,

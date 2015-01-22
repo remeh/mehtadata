@@ -59,7 +59,7 @@ func (m Matches) Less(i, j int) bool {
 
 // Does the HTTP call to find game information on TheGamesDB
 // TODO Platform support
-func (c *Client) Find(name string, platform Platform) (Gameinfo, error) {
+func (c *Client) Find(name string, platform Platform, outputDirectory string) (Gameinfo, error) {
 	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(name))
 
 	// HTTP call
@@ -102,7 +102,7 @@ func (c *Client) Find(name string, platform Platform) (Gameinfo, error) {
 		return Gameinfo{}, err
 	}
 
-	return gotGame.ToGameinfo(name), nil
+	return gotGame.ToGameinfo(outputDirectory, name), nil
 }
 
 func (c *Client) findSome(list Matches, platform Platform) []GetGame {
