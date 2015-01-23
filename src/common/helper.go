@@ -10,7 +10,7 @@ import (
 
 // Download downlads the given url and saves it to
 // name+prefix file of the current dir.
-func Download(url string, name string, suffix string) (string, error) {
+func Download(url string, name string, suffix string, outputDirectory string) (string, error) {
 	// http call
 	resp, err := http.Get(url)
 
@@ -27,7 +27,7 @@ func Download(url string, name string, suffix string) (string, error) {
 	}
 
 	// Opens the file
-	file, err := os.Create(name + suffix)
+	file, err := os.Create(outputDirectory + name + suffix)
 	if err != nil {
 		return "", err
 	}

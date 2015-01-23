@@ -58,9 +58,8 @@ func (m Matches) Less(i, j int) bool {
 }
 
 // Does the HTTP call to find game information on TheGamesDB
-// TODO Platform support
-func (c *Client) Find(name string, platform Platform, outputDirectory string) (Gameinfo, error) {
-	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(name))
+func (c *Client) Find(name string, platform string, outputDirectory string) (Gameinfo, error) {
+	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(name)) + "&platform=" + url.QueryEscape(platform)
 
 	// HTTP call
 	resp, err := http.Get(url)
@@ -105,7 +104,7 @@ func (c *Client) Find(name string, platform Platform, outputDirectory string) (G
 	return gotGame.ToGameinfo(outputDirectory, name), nil
 }
 
-func (c *Client) findSome(list Matches, platform Platform) []GetGame {
+func (c *Client) findSome(list Matches, platform string) []GetGame {
 	// Asynchronously get information for the games
 	// We need many to propose something.
 	var waitGroup sync.WaitGroup
@@ -114,7 +113,7 @@ func (c *Client) findSome(list Matches, platform Platform) []GetGame {
 		// One more to execute
 		waitGroup.Add(1)
 
-		go func(waitGroup *sync.WaitGroup, results *[]GetGame, game GetGamesListGame, platform Platform) {
+		go func(waitGroup *sync.WaitGroup, results *[]GetGame, game GetGamesListGame, platform string) {
 			defer waitGroup.Done() // Signal the end of the execution of the routine.
 
 			gotGame, err := c.FindGame(game, platform)
@@ -132,8 +131,8 @@ func (c *Client) findSome(list Matches, platform Platform) []GetGame {
 
 // FindGame does one call to TheGamesDB to retrieve one game
 // information by its ID.
-func (c *Client) FindGame(game GetGamesListGame, platform Platform) (GetGame, error) {
-	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAME + "?id=" + url.QueryEscape(fmt.Sprintf("%d", game.Id))
+func (c *Client) FindGame(game GetGamesListGame, platform string) (GetGame, error) {
+	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAME + "?id=" + url.QueryEscape(fmt.Sprintf("%d", game.Id)) + "&platform=" + url.QueryEscape(platform)
 
 	// HTTP call
 	resp, err := http.Get(url)
@@ -159,7 +158,7 @@ func (c *Client) FindGame(game GetGamesListGame, platform Platform) (GetGame, er
 // findBestMatch tries to find with the name and platform the best matching
 // game available in the list of responses from the TheGamesDB search query.
 // findBestMatches returned an ordered by best list of matches.
-func (c *Client) findBestMatches(name string, platform Platform, gamesList GetGamesList, count int) Matches {
+func (c *Client) findBestMatches(name string, platform string, gamesList GetGamesList, count int) Matches {
 	name = common.ClearName(name)
 
 	results := make(Matches, 0)

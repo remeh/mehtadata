@@ -8,7 +8,7 @@ import (
 )
 
 func Encode(gameinfo *Gamesinfo) ([]byte, error) {
-	result := bytes.NewBuffer(0)
+	result := bytes.NewBuffer(nil)
 	data, err := xml.MarshalIndent(gameinfo, "  ", "  ")
 
 	if err != nil {
