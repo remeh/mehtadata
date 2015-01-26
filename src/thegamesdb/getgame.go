@@ -27,7 +27,7 @@ type GetGameGame struct {
 	GameTitle   string
 	ReleaseDate string
 	Overview    string
-	Platform    model.Platform
+	Platform    string
 	Genres      GetGameGenres
 	Youtube     string
 	ESRB        string

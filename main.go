@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"common"
 	"model"
@@ -15,10 +16,11 @@ import (
 
 // Options given to the CLI
 type Flags struct {
-	Input     string // in which directory to look for games
-	Output    string // in which directory outputing the resulting files (images) and gamelist.xml
-	Extension string // extension to look for, separated by a space
-	Platform  string // To display the list of platforms
+	Input         string // in which directory to look for games
+	Output        string // in which directory outputing the resulting files (images) and gamelist.xml
+	Extension     string // extension to look for, separated by a space
+	Platform      string // Which platform we must use for the scraping
+	ShowPlatforms bool   // To show the list of available platforms.
 }
 
 // ParseFlags parses the CLI options.
@@ -27,17 +29,23 @@ func ParseFlags() Flags {
 
 	flag.StringVar(&(flags.Input), "in", "", "Input directories (directory containing games)")
 	flag.StringVar(&(flags.Output), "out", "", "Output directories for images and cover")
-	flag.StringVar(&(flags.Extension), "ext", "zip,rar", "Accepted extensions")
-	flag.StringVar(&(flags.Platform), "p", "", "'display' to prints the platform available")
+	flag.StringVar(&(flags.Extension), "ext", ".zip,.rar", "Accepted extensions")
+	flag.StringVar(&(flags.Platform), "p", "", "Platform to use for the scraping")
+	flag.BoolVar(&(flags.ShowPlatforms), "platforms", false, "Display all the available platforms")
 
 	flag.Parse()
 
-	// TODO be sure that it ends with /
+	if len(flags.Input) > 0 && string(flags.Input[len(flags.Input)-1]) != "/" {
+		flags.Input = flags.Input + "/"
+	}
+	if len(flags.Output) > 0 && string(flags.Output[len(flags.Output)-1]) != "/" {
+		flags.Output = flags.Output + "/"
+	}
 
 	return flags
 }
 
-func lookForFiles(directory string) []string {
+func lookForFiles(directory string, extensions []string) []string {
 	results := make([]string, 0)
 
 	// list files in the directory
@@ -50,8 +58,15 @@ func lookForFiles(directory string) []string {
 	for _, fileinfo := range fileinfos {
 		// don't mind of directories and check that the extension is valid for this scrape session.
 		name := fileinfo.Name()
-		if !fileinfo.IsDir() && filepath.Ext(name) == ".zip" { // TODO
-			results = append(results, name)
+		if !fileinfo.IsDir() {
+			// Check extensions
+			extension := strings.ToLower(filepath.Ext(name))
+			for _, e := range extensions {
+				if extension == strings.ToLower(e) {
+					results = append(results, name)
+					break
+				}
+			}
 		}
 	}
 
@@ -67,17 +82,24 @@ func printPlatforms() {
 func main() {
 	flags := ParseFlags()
 
-	if flags.Platform == "display" {
+	if flags.ShowPlatforms {
 		printPlatforms()
 		os.Exit(0)
 	}
 
-	filenames := lookForFiles(flags.Input)
+	// Extensions array
+	exts := make([]string, 0)
+	split := strings.Split(flags.Extension, ",")
+	for _, v := range split {
+		exts = append(exts, strings.Trim(v, " "))
+	}
+
+	filenames := lookForFiles(flags.Input, exts)
 	gamesinfo := model.NewGamesinfo()
 
 	// Create/lock the gamelist.xml for EmulationStation 2.0
 	// Do it now because it's useless to scrap everything if
-	// we can't write the result here...
+	// we can't write the result into gamelist.xml
 	file, err := os.Create(flags.Output + "gamelist.xml")
 
 	if err != nil {

@@ -21,7 +21,7 @@ func (g *Gamesinfo) AddGame(game Gameinfo) {
 type Gameinfo struct {
 	Filepath        string   `xml:"path"`
 	Title           string   `xml:"name"`
-	Platform        Platform `xml:"-"`
+	Platform        string   `xml:"-"`
 	Description     string   `xml:"desc"`
 	Genres          string   `xml:"genre"`
 	Players         string   `xml:"players"`
