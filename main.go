@@ -114,6 +114,9 @@ func main() {
 			log.Println("[err] Unable to find info for the game:", filename)
 			continue
 		}
+
+		// game scraped.
+		fmt.Printf("For '%s', scraped : '%s' on '%s'\n", filename, gameinfo.Title, gameinfo.Platform)
 		gamesinfo.AddGame(gameinfo)
 	}
 

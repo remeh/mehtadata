@@ -87,7 +87,6 @@ func (c *Client) Find(name string, platform string, outputDirectory string) (Gam
 
 	// Sort by rating
 	sort.Sort(list)
-	fmt.Println(list)
 
 	// If the rating isn't enough, crawl many games
 	// to propose a choice to the user.
