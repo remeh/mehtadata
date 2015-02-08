@@ -20,6 +20,7 @@ type Flags struct {
 	Output        string // in which directory outputing the resulting files (images) and gamelist.xml
 	Extension     string // extension to look for, separated by a space
 	Platform      string // Which platform we must use for the scraping
+	MaxWidth      uint   // Max width of the cover
 	ShowPlatforms bool   // To show the list of available platforms.
 }
 
@@ -31,6 +32,7 @@ func ParseFlags() Flags {
 	flag.StringVar(&(flags.Output), "out", "", "Output directories for images and cover")
 	flag.StringVar(&(flags.Extension), "ext", ".zip,.rar", "Accepted extensions")
 	flag.StringVar(&(flags.Platform), "p", "", "Platform to use for the scraping")
+	flag.UintVar(&(flags.MaxWidth), "w", 768, "Max width for the downloaded cover")
 	flag.BoolVar(&(flags.ShowPlatforms), "platforms", false, "Display all the available platforms")
 
 	flag.Parse()
@@ -63,6 +65,7 @@ func lookForFiles(directory string, extensions []string) []string {
 			extension := strings.ToLower(filepath.Ext(name))
 			for _, e := range extensions {
 				if extension == strings.ToLower(e) {
+					// removes the extension
 					results = append(results, name)
 					break
 				}
@@ -109,7 +112,7 @@ func main() {
 
 	client := thegamesdb.NewClient()
 	for _, filename := range filenames {
-		gameinfo, err := client.Find(filename, flags.Platform, flags.Output)
+		gameinfo, err := client.Find(filename, flags.Platform, flags.Output, flags.MaxWidth)
 		if err != nil {
 			log.Println("[err] Unable to find info for the game:", filename)
 			continue
@@ -120,6 +123,7 @@ func main() {
 		gamesinfo.AddGame(gameinfo)
 	}
 
+	// builds the gamelist.xml
 	data, err := common.Encode(gamesinfo)
 	if err != nil {
 		log.Println("[err] Failed to encode the final xml:", err.Error())

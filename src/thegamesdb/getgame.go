@@ -67,7 +67,7 @@ type GetGameScreenshot struct {
 // ToGameinfo converts the GetGame to a Gameinfo.
 // During the conversion, it downloads the whole set of available images.
 // FIXME A bit of refactoring could be done here... 2015-01-21 - remy
-func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string) model.Gameinfo {
+func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string, resizeWidth uint) model.Gameinfo {
 	g := gg.Game
 
 	// misc fields
@@ -93,7 +93,7 @@ func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string) model.
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext, outputDirectory)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext, outputDirectory, 0)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -112,7 +112,7 @@ func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string) model.
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext, outputDirectory)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext, outputDirectory, 0)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -139,7 +139,7 @@ func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string) model.
 			defer wg.Done()
 
 			ext := filepath.Ext(coverURL)
-			filename, err := common.Download(gg.BaseImageURL+coverURL, gameFilename, "-cover"+ext, outputDirectory)
+			filename, err := common.Download(gg.BaseImageURL+coverURL, gameFilename, "-cover"+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+coverURL, ":", err.Error())
 			} else {

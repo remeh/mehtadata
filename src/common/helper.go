@@ -1,16 +1,107 @@
 package common
 
 import (
+	"bytes"
+	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/nfnt/resize"
 )
+
+// ResizeImage uses the given data as an image and resize it
+// with the max width given (computing the height).
+// The filename is needed to know the filetype of the image.
+func ResizeAndWrite(filename string, data []byte, writer io.Writer, maxWidth uint) error {
+	var img image.Image
+	var err error
+
+	t := detectContentType(data)
+
+	// if the automatic detect conte type failed, try with the extension
+	if t == "" {
+		if strings.HasSuffix(filename, "jpg") || strings.HasSuffix(filename, "jpeg") {
+			t = "jpg"
+		} else if strings.HasSuffix(filename, "png") {
+			t = "png"
+		} else {
+			return fmt.Errorf("Unknown image format for : %s\n", filename)
+		}
+	}
+
+	dontResize := (maxWidth == 0)
+
+	// decodes the data
+	if t == "jpg" {
+		img, err = loadJpeg(data)
+		if err != nil {
+			log.Printf("Cant read '%s': %s\n", filename, err.Error())
+			dontResize = true
+		}
+	} else if t == "png" {
+		img, err = loadPng(data)
+		if err != nil {
+			log.Printf("Cant read '%s': %s\n", filename, err.Error())
+			dontResize = true
+		}
+	}
+
+	// resize if needed
+	if dontResize {
+		_, err = writer.Write(data)
+	} else {
+		if maxWidth > 0 {
+			img = resize.Resize(maxWidth, 0, img, resize.Lanczos3)
+		}
+
+		if t == "jpg" {
+			err = jpeg.Encode(writer, img, nil)
+			if err != nil {
+				log.Printf("Cant write '%s': %s\n", filename, err.Error())
+				return err
+			}
+		} else if t == "png" {
+			err = png.Encode(writer, img)
+			if err != nil {
+				log.Printf("Cant write '%s': %s\n", filename, err.Error())
+				return err
+			}
+		}
+	}
+
+	return err
+}
+
+func detectContentType(data []byte) string {
+	httpType := http.DetectContentType(data)
+	if httpType == "image/png" {
+		return "png"
+	} else if httpType == "image/jpeg" {
+		return "jpg"
+	}
+	return ""
+}
+
+func loadJpeg(data []byte) (image.Image, error) {
+	return jpeg.Decode(bytes.NewReader(data))
+}
+
+func loadPng(data []byte) (image.Image, error) {
+	return png.Decode(bytes.NewReader(data))
+}
 
 // Download downlads the given url and saves it to
 // name+prefix file of the current dir.
-func Download(url string, name string, suffix string, outputDirectory string) (string, error) {
+// If resizeWidth > 0, some resizing will be done before saving the file.
+func Download(url string, name string, suffix string, outputDirectory string, resizeWidth uint) (string, error) {
 	// http call
 	resp, err := http.Get(url)
 
@@ -32,11 +123,13 @@ func Download(url string, name string, suffix string, outputDirectory string) (s
 		return "", err
 	}
 
-	// Writes and closes the file
-	_, err = file.Write(data)
+	// Do some resizing if needed
+	err = ResizeAndWrite(url, data, file, resizeWidth)
 	if err != nil {
 		return "", err
 	}
+
+	// Finally, close the file writer.
 	err = file.Close()
 	if err != nil {
 		return "", err
@@ -106,7 +199,7 @@ func CompareFilename(first string, second string) float32 {
 
 // Compute the percentage of words matching : how many words are in second that exists in first.
 func computeHavingPercentage(first string, second string) float32 {
-	words := strings.Split(first, " ")
+	words := strings.Split(first, " -")
 	found := 0
 	for _, word := range words {
 		if strings.Contains(second, word) {

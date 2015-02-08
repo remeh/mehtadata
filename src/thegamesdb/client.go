@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"strings"
 	"sync"
 
 	"common"
@@ -23,7 +24,7 @@ const (
 	THEGAMESDB_GETGAMESLIST = "/GetGamesList.php"
 	THEGAMESDB_GETGAME      = "/GetGame.php"
 
-	MAX_RETRIEVED_GAMES                = 5
+	MAX_RETRIEVED_GAMES                = 20
 	MINIMUM_RATING_AUTOMATIC_SELECTION = 0.8
 )
 
@@ -57,9 +58,17 @@ func (m Matches) Less(i, j int) bool {
 	return m[j].Rating < m[i].Rating
 }
 
+func removeExtension(filename string) string {
+	parts := strings.Split(filename, ".")
+	if len(parts) == 1 {
+		return filename
+	}
+	return strings.Join(parts[0:len(parts)-1], "")
+}
+
 // Does the HTTP call to find game information on TheGamesDB
-func (c *Client) Find(name string, platform string, outputDirectory string) (Gameinfo, error) {
-	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(name)) + "&platform=" + url.QueryEscape(platform)
+func (c *Client) Find(name string, platform string, outputDirectory string, resizeWidth uint) (Gameinfo, error) {
+	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(removeExtension(name))) + "&platform=" + url.QueryEscape(platform)
 
 	// HTTP call
 	resp, err := http.Get(url)
@@ -100,7 +109,7 @@ func (c *Client) Find(name string, platform string, outputDirectory string) (Gam
 		return Gameinfo{}, err
 	}
 
-	return gotGame.ToGameinfo(outputDirectory, name), nil
+	return gotGame.ToGameinfo(outputDirectory, name, resizeWidth), nil
 }
 
 func (c *Client) findSome(list Matches, platform string) []GetGame {
@@ -158,7 +167,7 @@ func (c *Client) FindGame(game GetGamesListGame, platform string) (GetGame, erro
 // game available in the list of responses from the TheGamesDB search query.
 // findBestMatches returned an ordered by best list of matches.
 func (c *Client) findBestMatches(name string, platform string, gamesList GetGamesList, count int) Matches {
-	name = common.ClearName(name)
+	name = common.ClearName(removeExtension(name))
 
 	results := make(Matches, 0)
 
