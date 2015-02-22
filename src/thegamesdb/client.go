@@ -67,7 +67,7 @@ func removeExtension(filename string) string {
 }
 
 // Does the HTTP call to find game information on TheGamesDB
-func (c *Client) Find(name string, platform string, outputDirectory string, resizeWidth uint) (Gameinfo, error) {
+func (c *Client) Find(name string, platform string, inputDirectory, outputDirectory string, resizeWidth uint) (Gameinfo, error) {
 	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(removeExtension(name))) + "&platform=" + url.QueryEscape(platform)
 
 	// HTTP call
@@ -109,7 +109,7 @@ func (c *Client) Find(name string, platform string, outputDirectory string, resi
 		return Gameinfo{}, err
 	}
 
-	return gotGame.ToGameinfo(outputDirectory, name, resizeWidth), nil
+	return gotGame.ToGameinfo(inputDirectory, outputDirectory, name, resizeWidth), nil
 }
 
 func (c *Client) findSome(list Matches, platform string) []GetGame {

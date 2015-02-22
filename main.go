@@ -133,7 +133,7 @@ func main() {
 
 	client := thegamesdb.NewClient()
 	for _, filename := range filenames {
-		gameinfo, err := client.Find(filename, flags.Platform, flags.OutputDirectory, flags.MaxWidth)
+		gameinfo, err := client.Find(filename, flags.Platform, flags.InputDirectory, flags.OutputDirectory, flags.MaxWidth)
 		if err != nil {
 			log.Println("[err] Unable to find info for the game:", filename)
 			continue

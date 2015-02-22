@@ -67,7 +67,7 @@ type GetGameScreenshot struct {
 // ToGameinfo converts the GetGame to a Gameinfo.
 // During the conversion, it downloads the whole set of available images.
 // FIXME A bit of refactoring could be done here... 2015-01-21 - remy
-func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string, resizeWidth uint) model.Gameinfo {
+func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, gameFilename string, resizeWidth uint) model.Gameinfo {
 	g := gg.Game
 
 	// misc fields
@@ -151,7 +151,7 @@ func (gg GetGame) ToGameinfo(outputDirectory string, gameFilename string, resize
 	wg.Wait()
 
 	return model.Gameinfo{
-		Filepath:        outputDirectory + gameFilename,
+		Filepath:        inputDirectory + gameFilename,
 		Title:           g.GameTitle,
 		Platform:        g.Platform,
 		Publisher:       g.Publisher,

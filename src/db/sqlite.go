@@ -22,7 +22,7 @@ func WriteDatabase(database string, platform int, gamesInfo *model.Gamesinfo) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	execStmt, err := tx.Prepare("insert into executable (display_name, filepath, platform_id) values(?, ?, ?)")
+	execStmt, err := tx.Prepare("insert into executable (display_name, filepath, platform_id, description, genre, developer, publisher, release_date, players, rating) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	execResStmt, err := tx.Prepare("insert into executable_resource (executable_id, type, filepath) values(?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +40,8 @@ func WriteDatabase(database string, platform int, gamesInfo *model.Gamesinfo) {
 // writeGame writes one game in the DB.
 func writeGame(db *sql.DB, platform int, execStmt *sql.Stmt, execResStmt *sql.Stmt, gameInfo model.Gameinfo) {
 	// Entry in executable
-	result, err := execStmt.Exec(gameInfo.Title, gameInfo.Filepath, platform)
+	rating := fmt.Sprintf("%2.1f", gameInfo.Rating)
+	result, err := execStmt.Exec(gameInfo.Title, gameInfo.Filepath, platform, gameInfo.Description, gameInfo.Genres, gameInfo.Developer, gameInfo.Publisher, gameInfo.ReleaseDate, gameInfo.Players, rating)
 	if err != nil {
 		log.Printf("[err] Can't write the info of %s in the DB: %s", gameInfo.Title, err.Error())
 		return
