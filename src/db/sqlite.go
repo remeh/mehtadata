@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"model"
@@ -22,7 +23,7 @@ func WriteDatabase(database string, platform int, gamesInfo *model.Gamesinfo) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	execStmt, err := tx.Prepare("insert into executable (display_name, filepath, platform_id, description, genre, developer, publisher, release_date, players, rating) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	execStmt, err := tx.Prepare("insert into executable (display_name, filepath, platform_id, description, genres, developer, publisher, release_date, players, rating) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	execResStmt, err := tx.Prepare("insert into executable_resource (executable_id, type, filepath) values(?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
