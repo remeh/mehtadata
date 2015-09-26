@@ -162,8 +162,13 @@ func ClearName(name string) string {
 // Remove the special chars from the given string
 // and returns the result.
 func RemoveSpecialChars(s string) string {
+	// Replaces the "'s" with ""
+	s = strings.Replace(s, "'s", "", -1)
+
+	s = strings.Replace(s, " & ", " and ", -1)
+
 	// List of special characters
-	specialChars := ".-_\"':[](){}!%#"
+	specialChars := ",.-_\"':[](){}!%#"
 
 	// Copy the string
 	result := s
@@ -191,21 +196,29 @@ func CompareFilename(first string, second string) float32 {
 	// We now have two cleared file names.
 	// The idea is to split by spaces and look how much of the "words"
 	// of the subtitles filename we can find in the video filename
-	havingPercentage := computeHavingPercentage(first, second)
-	missingPercentage := computeHavingPercentage(second, first)
+	havingPercentage := computePercentage(first, second, false)
+	missingPercentage := computePercentage(second, first, true)
 
-	return missingPercentage + havingPercentage
+	return havingPercentage - (missingPercentage / 10.0)
 }
 
 // Compute the percentage of words matching : how many words are in second that exists in first.
-func computeHavingPercentage(first string, second string) float32 {
-	words := strings.Split(first, " -")
+func computePercentage(first string, second string, missing bool) float32 {
+	words := strings.Split(first, " ")
 	found := 0
 	for _, word := range words {
-		if strings.Contains(second, word) {
-			found++
+		if missing {
+			// compute missing
+			if !strings.Contains(second, word) {
+				found++
+			}
+		} else {
+			// compute having
+			if strings.Contains(second, word) {
+				found++
+			}
 		}
 	}
-	havingPercentage := float32(found) / float32(len(words))
-	return havingPercentage
+	percentage := float32(found) / float32(len(words))
+	return percentage
 }

@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -66,14 +67,13 @@ func removeExtension(filename string) string {
 	return strings.Join(parts[0:len(parts)-1], "")
 }
 
-// Does the HTTP call to find game information on TheGamesDB
-func (c *Client) Find(name string, platform string, inputDirectory, outputDirectory string, resizeWidth uint) (Gameinfo, error) {
+func (c *Client) callForPlatform(name, platform string) (GetGamesList, error) {
 	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(removeExtension(name))) + "&platform=" + url.QueryEscape(platform)
 
 	// HTTP call
 	resp, err := http.Get(url)
 	if err != nil {
-		return Gameinfo{}, err
+		return GetGamesList{}, err
 	}
 
 	defer resp.Body.Close()
@@ -81,14 +81,42 @@ func (c *Client) Find(name string, platform string, inputDirectory, outputDirect
 	// Read the response
 	readBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return Gameinfo{}, err
+		return GetGamesList{}, err
 	}
 
 	// Unmarshal the XML
 	var gamesList GetGamesList
-	xml.Unmarshal(readBody, &gamesList)
+	err = xml.Unmarshal(readBody, &gamesList)
+	return gamesList, err
+}
 
-	list := c.findBestMatches(name, platform, gamesList, MAX_RETRIEVED_GAMES)
+// Does the HTTP call to find game information on TheGamesDB
+func (c *Client) Find(name string, platforms []string, inputDirectory, outputDirectory string, resizeWidth uint) (Gameinfo, error) {
+	var gamesList GetGamesList
+
+	for _, p := range platforms {
+		l, err := c.callForPlatform(name, p)
+		if err != nil {
+			return Gameinfo{}, err
+		}
+
+		//	if len(list.XMLName) == 0 {
+		//		list.XMLName = l
+		//	}
+
+		ConcatGetGamesList(&gamesList, &l)
+	}
+
+	if len(os.Getenv("VERBOSE")) > 0 {
+		fmt.Printf("\nLooking for : '%s'\n", common.ClearName(name))
+		for _, g := range gamesList.Games {
+			fmt.Printf("- Possible match: '%s'\n", common.ClearName(g.GameTitle))
+			fmt.Printf("----> %f\n", common.CompareFilename(name, g.GameTitle))
+		}
+		fmt.Printf("\n")
+	}
+
+	list := c.findBestMatches(name, gamesList, MAX_RETRIEVED_GAMES*len(platforms))
 
 	if len(list) == 0 {
 		return Gameinfo{}, nil // we can't find anything on TheGamesDB
@@ -104,7 +132,7 @@ func (c *Client) Find(name string, platform string, inputDirectory, outputDirect
 	}
 
 	// The first one has a sufficient rating to be automatically used
-	gotGame, err := c.FindGame(list[0].Game, platform)
+	gotGame, err := c.FindGame(list[0].Game, list[0].Game.Platform)
 	if err != nil {
 		return Gameinfo{}, err
 	}
@@ -163,10 +191,10 @@ func (c *Client) FindGame(game GetGamesListGame, platform string) (GetGame, erro
 	return gotGame, nil
 }
 
-// findBestMatch tries to find with the name and platform the best matching
+// findBestMatch tries to find with the name matching
 // game available in the list of responses from the TheGamesDB search query.
 // findBestMatches returned an ordered by best list of matches.
-func (c *Client) findBestMatches(name string, platform string, gamesList GetGamesList, count int) Matches {
+func (c *Client) findBestMatches(name string, gamesList GetGamesList, count int) Matches {
 	name = common.ClearName(removeExtension(name))
 
 	results := make(Matches, 0)

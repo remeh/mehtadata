@@ -45,6 +45,7 @@ type GetGameImages struct {
 	Fanarts     []GetGameFanart     `xml:"fanart"`
 	Boxarts     []GetGameBoxart     `xml:"boxart"`
 	Screenshots []GetGameScreenshot `xml:"screenshot"`
+	Logos       []GetGameLogo       `xml:"clearlogo"`
 }
 
 type GetGameFanart struct {
@@ -56,6 +57,12 @@ type GetGameBoxart struct {
 	Side   string `xml:"side,attr"`
 	Thumb  string `xml:"thumb,attr"`
 	Boxart string `xml:",innerxml"`
+}
+
+type GetGameLogo struct {
+	Width  int    `xml:"width,attr"`
+	Height int    `xml:"height,attr"`
+	Logo   string `xml:",innerxml"`
 }
 
 type GetGameScreenshot struct {
@@ -121,6 +128,25 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 		}(&wg, v.Original, i)
 	}
 
+	// logos
+
+	logos := make([]string, 0)
+	for i, v := range gg.Game.Images.Logos {
+		wg.Add(1)
+
+		go func(wg *sync.WaitGroup, path string, i int) {
+			defer wg.Done()
+
+			ext := filepath.Ext(path)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-logo-"+strconv.Itoa(i)+ext, outputDirectory, 0)
+			if err != nil {
+				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
+			} else {
+				logos = append(logos, outputDirectory+filename)
+			}
+		}(&wg, v.Logo, i)
+	}
+
 	// look for a front cover
 	front := gg.havingFront(gg.Game.Images.Boxarts)
 	var coverURL string
@@ -131,6 +157,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 		// No front, take something
 		coverURL = gg.Game.Images.Boxarts[0].Boxart
 	}
+
 	// something to download for the cover
 	if coverURL != "" {
 		wg.Add(1)
@@ -158,6 +185,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 		Developer:       g.Developer,
 		ReleaseDate:     g.ReleaseDate,
 		ScreenshotPaths: screenshots,
+		LogoPaths:       logos,
 		FanartPaths:     fanarts,
 		CoverPath:       cover,
 		Description:     g.Overview,

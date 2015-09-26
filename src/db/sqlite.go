@@ -61,6 +61,16 @@ func writeGame(db *sql.DB, platform int, execStmt *sql.Stmt, execResStmt *sql.St
 			log.Printf("[err] Can't write the cover of %s in the DB: %s", gameInfo.Title, err.Error())
 		}
 	}
+	// Logos
+	if len(gameInfo.LogoPaths) != 0 {
+		for idx := range gameInfo.LogoPaths {
+			logoPath := gameInfo.LogoPaths[idx]
+			result, err = execResStmt.Exec(id, "logo", logoPath)
+			if err != nil {
+				log.Printf("[err] Can't write a logo of %s in the DB: %s", gameInfo.Title, err.Error())
+			}
+		}
+	}
 	// Screenshots
 	if len(gameInfo.ScreenshotPaths) != 0 {
 		for idx := range gameInfo.ScreenshotPaths {

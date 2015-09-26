@@ -38,7 +38,7 @@ func ParseFlags() Flags {
 	flag.StringVar(&(flags.DestSqlite), "meh-db", "database.db", "If destination is mehstation, the mehstation database write in.")
 	flag.IntVar(&(flags.DestPlatform), "meh-platform", -1, "If destination is mehstation, the mehstation database write in.")
 	flag.StringVar(&(flags.Extension), "ext", ".zip,.rar", "Accepted extensions")
-	flag.StringVar(&(flags.Platform), "p", "", "Platform to use for the scraping")
+	flag.StringVar(&(flags.Platform), "p", "", "Platforms to use for the scraping. Ex: 'Sega Mega Drive,Sega Genesis")
 	flag.UintVar(&(flags.MaxWidth), "w", 768, "Max width for the downloaded cover")
 	flag.BoolVar(&(flags.ShowPlatforms), "platforms", false, "Display all the available platforms")
 
@@ -81,7 +81,7 @@ func lookForFiles(directory string, extensions []string) []string {
 			for _, e := range extensions {
 				if extension == strings.ToLower(e) {
 					// removes the extension
-					results = append(results, name)
+					results = append(results, strings.Replace(name, e, "", 1))
 					break
 				}
 			}
@@ -107,10 +107,17 @@ func main() {
 	}
 
 	// Extensions array
-	exts := make([]string, 0)
 	split := strings.Split(flags.Extension, ",")
-	for _, v := range split {
-		exts = append(exts, strings.Trim(v, " "))
+	exts := make([]string, len(split))
+	for i, v := range split {
+		exts[i] = strings.Trim(v, " ")
+	}
+
+	// Platforms array
+	split = strings.Split(flags.Platform, ",")
+	platforms := make([]string, len(split))
+	for i, v := range split {
+		platforms[i] = strings.Trim(v, " ")
 	}
 
 	filenames := lookForFiles(flags.InputDirectory, exts)
@@ -133,7 +140,7 @@ func main() {
 
 	client := thegamesdb.NewClient()
 	for _, filename := range filenames {
-		gameinfo, err := client.Find(filename, flags.Platform, flags.InputDirectory, flags.OutputDirectory, flags.MaxWidth)
+		gameinfo, err := client.Find(filename, platforms, flags.InputDirectory, flags.OutputDirectory, flags.MaxWidth)
 		if err != nil {
 			log.Println("[err] Unable to find info for the game:", filename)
 			continue

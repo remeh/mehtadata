@@ -29,6 +29,7 @@ type Gameinfo struct {
 	Developer       string   `xml:"developer"`
 	ReleaseDate     string   `xml:"released"`
 	CoverPath       string   `xml:"image"`
+	LogoPaths       []string `xml:"-"`
 	ScreenshotPaths []string `xml:"-"`
 	FanartPaths     []string `xml:"-"`
 	Rating          float32  `xml:"rating"`

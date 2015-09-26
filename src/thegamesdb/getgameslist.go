@@ -19,3 +19,12 @@ type GetGamesListGame struct {
 	ReleaseDate string
 	Platform    string
 }
+
+func ConcatGetGamesList(first *GetGamesList, second *GetGamesList) {
+	if first == nil || second == nil {
+		return
+	}
+	for _, g := range second.Games {
+		first.Games = append(first.Games, g)
+	}
+}
