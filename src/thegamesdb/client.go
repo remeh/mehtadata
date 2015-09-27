@@ -108,15 +108,15 @@ func (c *Client) Find(name string, platforms []string, inputDirectory, outputDir
 	}
 
 	if len(os.Getenv("VERBOSE")) > 0 {
-		fmt.Printf("\nLooking for : '%s'\n", common.ClearName(name))
+		fmt.Printf("\nLooking for : '%s'\n", common.ClearName(removeExtension(name)))
 		for _, g := range gamesList.Games {
 			fmt.Printf("- Possible match: '%s'\n", common.ClearName(g.GameTitle))
-			fmt.Printf("----> %f\n", common.CompareFilename(name, g.GameTitle))
+			fmt.Printf("----> %f\n", common.CompareFilename(removeExtension(name), g.GameTitle))
 		}
 		fmt.Printf("\n")
 	}
 
-	list := c.findBestMatches(name, gamesList, MAX_RETRIEVED_GAMES*len(platforms))
+	list := c.findBestMatches(name, gamesList)
 
 	if len(list) == 0 {
 		return Gameinfo{}, nil // we can't find anything on TheGamesDB
@@ -194,7 +194,7 @@ func (c *Client) FindGame(game GetGamesListGame, platform string) (GetGame, erro
 // findBestMatch tries to find with the name matching
 // game available in the list of responses from the TheGamesDB search query.
 // findBestMatches returned an ordered by best list of matches.
-func (c *Client) findBestMatches(name string, gamesList GetGamesList, count int) Matches {
+func (c *Client) findBestMatches(name string, gamesList GetGamesList) Matches {
 	name = common.ClearName(removeExtension(name))
 
 	results := make(Matches, 0)
@@ -204,11 +204,6 @@ func (c *Client) findBestMatches(name string, gamesList GetGamesList, count int)
 	for _, v := range gamesList.Games {
 		rating := common.CompareFilename(v.GameTitle, name)
 		results = append(results, Match{Game: v, Rating: rating})
-
-		// stop if we have enough
-		if len(results) == count {
-			return results
-		}
 	}
 
 	return results

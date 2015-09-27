@@ -80,8 +80,7 @@ func lookForFiles(directory string, extensions []string) []string {
 			extension := strings.ToLower(filepath.Ext(name))
 			for _, e := range extensions {
 				if extension == strings.ToLower(e) {
-					// removes the extension
-					results = append(results, strings.Replace(name, e, "", 1))
+					results = append(results, name)
 					break
 				}
 			}

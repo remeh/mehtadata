@@ -188,7 +188,6 @@ func RemoveSpecialChars(s string) string {
 // Code re-used from https://github.com/remeh/go-subtitles
 // to compute the percentage of matching words into the given strings.
 func CompareFilename(first string, second string) float32 {
-
 	// clears both filename
 	first = ClearName(first)
 	second = ClearName(second)
