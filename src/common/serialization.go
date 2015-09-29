@@ -3,6 +3,7 @@ package common
 import (
 	"bytes"
 	"encoding/xml"
+	"io/ioutil"
 
 	. "model"
 )
@@ -20,4 +21,13 @@ func Encode(gameinfo *Gamesinfo) ([]byte, error) {
 
 	return result.Bytes(), nil
 
+}
+
+func Decode(filename string) (Gamesinfo, error) {
+	// read the files
+	data, err := ioutil.ReadFile(filename)
+
+	var result Gamesinfo
+	err = xml.Unmarshal(data, &result)
+	return result, err
 }
