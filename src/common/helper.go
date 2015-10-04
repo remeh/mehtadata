@@ -15,7 +15,12 @@ import (
 	"strings"
 
 	"github.com/nfnt/resize"
+	"model"
 )
+
+func FillDefaults(filename string, gameinfo *model.Gameinfo) {
+	gameinfo.Title = ClearName(filename)
+}
 
 // ResizeImage uses the given data as an image and resize it
 // with the max width given (computing the height).

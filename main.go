@@ -146,7 +146,12 @@ func main() {
 		}
 
 		// game scraped.
-		fmt.Printf("For '%s', scraped : '%s' on '%s'\n", filename, gameinfo.Title, gameinfo.Platform)
+		if len(gameinfo.Title) > 0 {
+			fmt.Printf("For '%s', scraped : '%s' on '%s'\n", filename, gameinfo.Title, gameinfo.Platform)
+		} else {
+			common.FillDefaults(filename, &gameinfo)
+			fmt.Printf("Nothing found for '%s'\n", filename)
+		}
 		gamesinfo.AddGame(gameinfo)
 	}
 
