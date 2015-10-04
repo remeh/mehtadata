@@ -18,8 +18,20 @@ import (
 	"model"
 )
 
-func FillDefaults(filename string, gameinfo *model.Gameinfo) {
-	gameinfo.Title = ClearName(filename)
+func FillDefaults(inputDirectory, filename string, gameinfo *model.Gameinfo) {
+	gameinfo.Title = RemoveSpecialChars(RemoveExtension(filename))
+	if !strings.HasSuffix(inputDirectory, "/") && !strings.HasPrefix(filename, "/") {
+		filename = "/" + filename
+	}
+	gameinfo.Filepath = inputDirectory + filename
+}
+
+func RemoveExtension(filename string) string {
+	parts := strings.Split(filename, ".")
+	if len(parts) == 1 {
+		return filename
+	}
+	return strings.Join(parts[0:len(parts)-1], "")
 }
 
 // ResizeImage uses the given data as an image and resize it

@@ -12,7 +12,6 @@ import (
 	"net/url"
 	"os"
 	"sort"
-	"strings"
 	"sync"
 
 	"common"
@@ -59,16 +58,8 @@ func (m Matches) Less(i, j int) bool {
 	return m[j].Rating < m[i].Rating
 }
 
-func removeExtension(filename string) string {
-	parts := strings.Split(filename, ".")
-	if len(parts) == 1 {
-		return filename
-	}
-	return strings.Join(parts[0:len(parts)-1], "")
-}
-
 func (c *Client) callForPlatform(name, platform string) (GetGamesList, error) {
-	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(removeExtension(name))) + "&platform=" + url.QueryEscape(platform)
+	url := THEGAMESDB_API_URL + THEGAMESDB_GETGAMESLIST + "?name=" + url.QueryEscape(common.ClearName(common.RemoveExtension(name))) + "&platform=" + url.QueryEscape(platform)
 
 	// HTTP call
 	resp, err := http.Get(url)
@@ -108,10 +99,10 @@ func (c *Client) Find(name string, platforms []string, inputDirectory, outputDir
 	}
 
 	if len(os.Getenv("VERBOSE")) > 0 {
-		fmt.Printf("\nLooking for : '%s'\n", common.ClearName(removeExtension(name)))
+		fmt.Printf("\nLooking for : '%s'\n", common.ClearName(common.RemoveExtension(name)))
 		for _, g := range gamesList.Games {
 			fmt.Printf("- Possible match: '%s'\n", common.ClearName(g.GameTitle))
-			fmt.Printf("----> %f\n", common.CompareFilename(removeExtension(name), g.GameTitle))
+			fmt.Printf("----> %f\n", common.CompareFilename(common.RemoveExtension(name), g.GameTitle))
 		}
 		fmt.Printf("\n")
 	}
@@ -195,7 +186,7 @@ func (c *Client) FindGame(game GetGamesListGame, platform string) (GetGame, erro
 // game available in the list of responses from the TheGamesDB search query.
 // findBestMatches returned an ordered by best list of matches.
 func (c *Client) findBestMatches(name string, gamesList GetGamesList) Matches {
-	name = common.ClearName(removeExtension(name))
+	name = common.ClearName(common.RemoveExtension(name))
 
 	results := make(Matches, 0)
 
