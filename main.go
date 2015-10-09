@@ -26,6 +26,7 @@ type Flags struct {
 	Platform        string // Which platform we must use for the scraping
 	MaxWidth        uint   // Max width of the cover
 	ShowPlatforms   bool   // To show the list of available platforms.
+	InputGamelist   string // gamelist.xml file
 }
 
 // ParseFlags parses the CLI options.
@@ -41,6 +42,7 @@ func ParseFlags() Flags {
 	flag.StringVar(&(flags.Platform), "p", "", "Platforms to use for the scraping. Ex: 'Sega Mega Drive,Sega Genesis")
 	flag.UintVar(&(flags.MaxWidth), "w", 768, "Max width for the downloaded cover")
 	flag.BoolVar(&(flags.ShowPlatforms), "platforms", false, "Display all the available platforms")
+	flag.StringVar(&(flags.InputGamelist), "es", "", "gamelist.xml to import (Import from EmulationStation mode)")
 
 	flag.Parse()
 
@@ -96,14 +98,50 @@ func printPlatforms() {
 	}
 }
 
+func importFromEmulationStation(flags Flags) {
+	if len(flags.DestSqlite) == 0 || flags.DestPlatform < 0 {
+		fmt.Printf("Parameter error:\nWith the -es flag (import from emulation station), you'll need to\nprovida a meh-db pointing to the 'database.db'\nand a meh-platform value pointing to the dest platform.")
+		os.Exit(1)
+	}
+
+	file, err := os.Open(flags.InputGamelist)
+	if err != nil {
+		log.Println("[err]", err.Error())
+		os.Exit(1)
+	}
+	file.Close()
+
+	gamesinfo, err := common.Decode(flags.InputGamelist)
+	if err != nil {
+		log.Println("[err]", err.Error())
+		os.Exit(1)
+	}
+
+	db.WriteDatabase(flags.DestSqlite, flags.DestPlatform, &gamesinfo)
+
+	log.Printf("%s imported.\n", flags.InputGamelist)
+
+	os.Exit(0)
+}
+
 func main() {
 	var err error
 	flags := ParseFlags()
+
+	// Show platforms mode
 
 	if flags.ShowPlatforms {
 		printPlatforms()
 		os.Exit(0)
 	}
+
+	// Import from EmulationStation mode.
+
+	if len(flags.InputGamelist) > 0 {
+		importFromEmulationStation(flags)
+	}
+
+	// Regular scraping
 
 	// Extensions array
 	split := strings.Split(flags.Extension, ",")
