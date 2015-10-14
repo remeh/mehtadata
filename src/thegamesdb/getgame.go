@@ -100,7 +100,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext, outputDirectory, 0)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -119,7 +119,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext, outputDirectory, 0)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -138,7 +138,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-logo-"+strconv.Itoa(i)+ext, outputDirectory, 0)
+			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-logo-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
