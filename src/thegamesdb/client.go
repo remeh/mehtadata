@@ -116,13 +116,7 @@ func (c *Client) Find(name string, platforms []string, inputDirectory, outputDir
 	// Sort by rating
 	sort.Sort(list)
 
-	// If the rating isn't enough, crawl many games
-	// to propose a choice to the user.
-	if list[0].Rating < MINIMUM_RATING_AUTOMATIC_SELECTION {
-		// TODO with the method findSome
-	}
-
-	// The first one has a sufficient rating to be automatically used
+	// The first one should have a sufficient rating to be automatically used
 	gotGame, err := c.FindGame(list[0].Game, list[0].Game.Platform)
 	if err != nil {
 		return Gameinfo{}, err
