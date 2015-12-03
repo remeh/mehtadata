@@ -233,11 +233,13 @@ var TGDBPlatforms = []TGDBPlatform{
 		"Sega Master System",
 		"sega-master-system",
 	},
-	TGDBPlatform{
-		36,
-		"Sega Mega Drive",
-		"sega-mega-drive",
-	},
+	/*
+		TGDBPlatform{
+			36,
+			"Sega Mega Drive",
+			"sega-mega-drive",
+		},
+	*/
 	TGDBPlatform{
 		17,
 		"Sega Saturn",

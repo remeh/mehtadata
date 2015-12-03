@@ -180,6 +180,7 @@ func main() {
 		gameinfo, err := client.Find(filename, platforms, flags.InputDirectory, flags.OutputDirectory, flags.MaxWidth)
 		if err != nil {
 			log.Println("[err] Unable to find info for the game:", filename)
+			log.Println(err)
 			continue
 		}
 
