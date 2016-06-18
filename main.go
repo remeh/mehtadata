@@ -150,10 +150,21 @@ func main() {
 		platforms[i] = strings.Trim(v, " ")
 	}
 
-	filenames := lookForFiles(flags.InputDirectory, exts)
-	gamesinfo := model.NewGamesinfo()
+	// look for files to proceed in the given directory if any
+	var filenames []string
+	if len(flags.InputDirectory) > 0 {
+		filenames = lookForFiles(flags.InputDirectory, exts)
+	} else {
+		if len(flag.Args()) == 0 {
+			fmt.Println("You should either use the -in-dir flag or provide filepath when calling mehtadata.")
+			os.Exit(1)
+		}
+		filenames = flag.Args()
+	}
 
+	gamesinfo := model.NewGamesinfo()
 	client := thegamesdb.NewClient()
+
 	for _, filename := range filenames {
 		gameinfo, err := client.Find(filename, platforms, flags.InputDirectory, flags.OutputDirectory, flags.MaxWidth)
 		if err != nil {
