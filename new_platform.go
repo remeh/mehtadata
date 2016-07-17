@@ -35,17 +35,17 @@ func NewPlatform(flags Flags) (int64, error) {
 
 	if !ok {
 		fmt.Println(`Can't create a new platform.
-		Mandatory infos:
-		NAME      : name of the platform
-		COMMAND   : absolute path to the command with the %exec% flag to start the platform on an executable.
-		            Ex:  COMMAND="/usr/bin/retroarch -L /usr/lib/libretro/scumm.so %exec%"
-		Discover mode:
-		DIR       : which directory contains the executables which must be discovered.
-		EXTS      : extensions of the executables when scanning the directory.
-		Not mandatory:
-		TYPE      : display format. Possible values: "complete", "cover"
-		ICON      : absolute path to the icon image to use for this platform.
-		BG        : absolute path to the background image to use for this platform.
+Mandatory infos:
+	NAME      : name of the platform
+	COMMAND   : absolute path to the command with the %exec% flag to start the platform on an executable.
+		Ex:  COMMAND="/usr/bin/retroarch -L /usr/lib/libretro/scumm.so %exec%"
+Discover mode:
+	DIR       : which directory contains the executables which must be discovered.
+	EXTS      : extensions of the executables when scanning the directory.
+Not mandatory:
+	TYPE      : display format. Possible values: "complete", "cover"
+	ICON      : absolute path to the icon image to use for this platform.
+	BG        : absolute path to the background image to use for this platform.
 		`)
 		return -1, fmt.Errorf("Missing fields.")
 	}
