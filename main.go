@@ -27,7 +27,7 @@ type Flags struct {
 	ShowPlatforms   bool   // To show the list of available platforms.
 	InputGamelist   string // gamelist.xml file
 
-	NewPlatform string // name of a new platform to create
+	NewPlatform bool // name of a new platform to create
 }
 
 // ParseFlags parses the CLI options.
@@ -44,7 +44,7 @@ func ParseFlags() Flags {
 	flag.BoolVar(&(flags.ShowPlatforms), "platforms", false, "Display all the available platforms")
 	flag.StringVar(&(flags.InputGamelist), "es", "", "gamelist.xml to import (Import from EmulationStation mode)")
 
-	flag.StringVar(&(flags.NewPlatform), "new-platform", "", "To create a new platform.")
+	flag.BoolVar(&(flags.NewPlatform), "new-platform", false, "To create a new platform.")
 
 	flag.Parse()
 
@@ -53,10 +53,6 @@ func ParseFlags() Flags {
 	}
 	if len(flags.OutputDirectory) > 0 && string(flags.OutputDirectory[len(flags.OutputDirectory)-1]) != "/" {
 		flags.OutputDirectory = flags.OutputDirectory + "/"
-	}
-
-	if flags.DestPlatform == -1 {
-		log.Fatalf("To write in a mehstation DB, mehtadata needs the platform ID for which it will scrape metadata.")
 	}
 
 	return flags
@@ -126,9 +122,20 @@ func main() {
 	flags := ParseFlags()
 
 	// Show platforms mode
+	// ----------------------
 
 	if flags.ShowPlatforms {
 		printPlatforms()
+		os.Exit(0)
+	}
+
+	// Create platform
+	// ----------------------
+
+	if flags.NewPlatform {
+		if _, err := NewPlatform(); err != nil {
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}
 
@@ -139,6 +146,10 @@ func main() {
 	}
 
 	// Regular scraping
+
+	if flags.DestPlatform == -1 {
+		log.Fatalf("To write in a mehstation DB, mehtadata needs the platform ID for which it will scrape metadata.")
+	}
 
 	// Extensions array
 	split := strings.Split(flags.Extension, ",")
