@@ -12,7 +12,7 @@ import (
 
 // CreatePlatform creates an empty platform in the given sqlite database.
 // Returns the ID of the newly created platform.
-func CreatePlatform(database, name, command, icon, background, typ, discoverDir, discoverExts string) int64 {
+func CreatePlatform(database string, platform model.Platform) int64 {
 
 	// database
 	// ----------------------
@@ -41,15 +41,15 @@ func CreatePlatform(database, name, command, icon, background, typ, discoverDir,
 
 	tx.Commit()
 
-	result, err := execStmt.Exec(name, command, icon, background, typ, discoverDir, discoverExts)
+	result, err := execStmt.Exec(platform.Name, platform.Command, platform.Icon, platform.Background, platform.Type, platform.DiscoverDir, platform.DiscoverExts)
 	if err != nil {
-		log.Printf("[err] Can't create a new platform %s in the DB: %s", name, err.Error())
+		log.Printf("[err] Can't create a new platform %s in the DB: %s", platform.Name, err.Error())
 		return -1
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		log.Printf("[err] Can't retrieve the last insert id for %s : %s", name, err.Error())
+		log.Printf("[err] Can't retrieve the last insert id for %s : %s", platform.Name, err.Error())
 		return -1
 	}
 

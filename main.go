@@ -26,6 +26,8 @@ type Flags struct {
 	MaxWidth        uint   // Max width of the cover
 	ShowPlatforms   bool   // To show the list of available platforms.
 	InputGamelist   string // gamelist.xml file
+
+	NewPlatform string // name of a new platform to create
 }
 
 // ParseFlags parses the CLI options.
@@ -41,6 +43,8 @@ func ParseFlags() Flags {
 	flag.UintVar(&(flags.MaxWidth), "w", 768, "Max width for the downloaded cover")
 	flag.BoolVar(&(flags.ShowPlatforms), "platforms", false, "Display all the available platforms")
 	flag.StringVar(&(flags.InputGamelist), "es", "", "gamelist.xml to import (Import from EmulationStation mode)")
+
+	flag.StringVar(&(flags.NewPlatform), "new-platform", "", "To create a new platform.")
 
 	flag.Parse()
 
