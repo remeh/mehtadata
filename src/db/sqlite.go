@@ -10,6 +10,52 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// CreatePlatform creates an empty platform in the given sqlite database.
+// Returns the ID of the newly created platform.
+func CreatePlatform(database, name, command, icon, background, typ, discoverDir, discoverExts string) int64 {
+
+	// database
+	// ----------------------
+
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// prepares the transaction
+	// ----------------------
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	execStmt, err := tx.Prepare(`insert into platform ("name", "command", "icon", "background", "type", "discover_dir", "discover_ext") values(?, ?, ?, ?, ?, ?, ?)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// executes the query
+	// ----------------------
+
+	tx.Commit()
+
+	result, err := execStmt.Exec(name, command, icon, background, typ, discoverDir, discoverExts)
+	if err != nil {
+		log.Printf("[err] Can't create a new platform %s in the DB: %s", name, err.Error())
+		return -1
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Printf("[err] Can't retrieve the last insert id for %s : %s", name, err.Error())
+		return -1
+	}
+
+	return id
+}
+
 // writeDatabase writes the result of the scraping into the given database.
 func WriteDatabase(database string, platform int, gamesInfo *model.Gamesinfo) {
 	db, err := sql.Open("sqlite3", database)
