@@ -12,7 +12,7 @@ import (
 
 // CreatePlatform creates an empty platform in the given sqlite database.
 // Returns the ID of the newly created platform.
-func CreatePlatform(database string, platform model.Platform) int64 {
+func CreatePlatform(database string, platform model.Platform) (int64, error) {
 
 	// database
 	// ----------------------
@@ -28,32 +28,30 @@ func CreatePlatform(database string, platform model.Platform) int64 {
 
 	tx, err := db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
 
-	execStmt, err := tx.Prepare(`insert into platform ("name", "command", "icon", "background", "type", "discover_dir", "discover_ext") values(?, ?, ?, ?, ?, ?, ?)`)
+	execStmt, err := tx.Prepare(`insert into "platform" ("name", "command", "icon", "background", "type", "discover_dir", "discover_ext") values(?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
 
 	// executes the query
 	// ----------------------
 
+	result, err := execStmt.Exec(platform.Name, platform.Command, platform.Icon, platform.Background, platform.Type, platform.DiscoverDir, platform.DiscoverExts)
 	tx.Commit()
 
-	result, err := execStmt.Exec(platform.Name, platform.Command, platform.Icon, platform.Background, platform.Type, platform.DiscoverDir, platform.DiscoverExts)
 	if err != nil {
-		log.Printf("[err] Can't create a new platform %s in the DB: %s", platform.Name, err.Error())
-		return -1
+		return -1, fmt.Errorf("[err] Can't create a new platform %s in the DB: %s", platform.Name, err.Error())
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		log.Printf("[err] Can't retrieve the last insert id for %s : %s", platform.Name, err.Error())
-		return -1
+		return -1, fmt.Errorf("[err] Can't create a new platform %s in the DB (id retrieving): %s", platform.Name, err.Error())
 	}
 
-	return id
+	return id, nil
 }
 
 // writeDatabase writes the result of the scraping into the given database.

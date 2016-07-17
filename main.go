@@ -133,9 +133,11 @@ func main() {
 	// ----------------------
 
 	if flags.NewPlatform {
-		if _, err := NewPlatform(); err != nil {
+		if _, err := NewPlatform(flags); err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
+		fmt.Println("Platform created.")
 		os.Exit(0)
 	}
 

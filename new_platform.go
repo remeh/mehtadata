@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"db"
+	"model"
 )
 
-func NewPlatform() (int64, error) {
+func NewPlatform(flags Flags) (int64, error) {
 	// try to read in the env var if
 	// everything is available
 
@@ -13,26 +16,21 @@ func NewPlatform() (int64, error) {
 	name := os.Getenv("NAME")
 	command := os.Getenv("COMMAND")
 	typ := os.Getenv("TYPE")
-	//icon := os.Getenv("ICON")
-	//background := os.Getenv("BG")
+	icon := os.Getenv("ICON")
+	background := os.Getenv("BG")
 
 	// discover mode
-	discover_dir := os.Getenv("DIR")
-	discover_exts := os.Getenv("EXTS")
+	discoverDir := os.Getenv("DIR")
+	discoverExts := os.Getenv("EXTS")
 
 	if typ != "cover" && typ != "complete" {
 		typ = "complete"
 	}
 
 	ok := false
-	discover := false
 
 	if StringsHasContent(name, command) {
 		ok = true
-	}
-
-	if StringsHasContent(discover_dir, discover_exts) {
-		discover = true
 	}
 
 	if !ok {
@@ -52,10 +50,17 @@ func NewPlatform() (int64, error) {
 		return -1, fmt.Errorf("Missing fields.")
 	}
 
-	// TODO(remy): create the platform.
-	if discover {
+	platform := model.Platform{
+		Name:         name,
+		Command:      command,
+		Type:         typ,
+		Icon:         icon,
+		Background:   background,
+		DiscoverDir:  discoverDir,
+		DiscoverExts: discoverExts,
 	}
-	return 0, nil
+
+	return db.CreatePlatform(flags.DestSqlite, platform)
 }
 
 // StringsHasContent tests that every given string
