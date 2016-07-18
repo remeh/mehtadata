@@ -11,7 +11,6 @@ import (
 
 	"common"
 	"db"
-	"thegamesdb"
 )
 
 // Options given to the CLI
@@ -68,12 +67,6 @@ func lookForFiles(directory string, extensions []string) []string {
 	return results
 }
 
-func printPlatforms() {
-	for _, p := range thegamesdb.TGDBPlatforms {
-		fmt.Printf("%s\n", p.Name)
-	}
-}
-
 func importFromEmulationStation(flags Flags) {
 	if len(flags.DestSqlite) == 0 {
 		fmt.Printf("Parameter error:\nWith the -es flag (import from emulation station), you'll need to\nprovida a meh-db pointing to the 'database.db'\nand a meh-platform value pointing to the dest platform.")
@@ -110,7 +103,7 @@ func main() {
 	// ----------------------
 
 	if flags.ShowPlatforms {
-		printPlatforms()
+		ShowPlatforms()
 		os.Exit(0)
 	}
 
