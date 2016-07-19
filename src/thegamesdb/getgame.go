@@ -12,8 +12,8 @@ import (
 	"strings"
 	"sync"
 
-	"common"
 	"model"
+	"scraper"
 )
 
 type GetGame struct {
@@ -100,7 +100,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
+			filename, err := scraper.Download(gg.BaseImageURL+path, gameFilename, "-fanart-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -119,7 +119,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
+			filename, err := scraper.Download(gg.BaseImageURL+path, gameFilename, "-screenshot-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -138,7 +138,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(path)
-			filename, err := common.Download(gg.BaseImageURL+path, gameFilename, "-logo-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
+			filename, err := scraper.Download(gg.BaseImageURL+path, gameFilename, "-logo-"+strconv.Itoa(i)+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+path, ":", err.Error())
 			} else {
@@ -166,7 +166,7 @@ func (gg GetGame) ToGameinfo(inputDirectory string, outputDirectory string, game
 			defer wg.Done()
 
 			ext := filepath.Ext(coverURL)
-			filename, err := common.Download(gg.BaseImageURL+coverURL, gameFilename, "-cover"+ext, outputDirectory, resizeWidth)
+			filename, err := scraper.Download(gg.BaseImageURL+coverURL, gameFilename, "-cover"+ext, outputDirectory, resizeWidth)
 			if err != nil {
 				log.Println("[err] While downloading ", gg.BaseImageURL+coverURL, ":", err.Error())
 			} else {

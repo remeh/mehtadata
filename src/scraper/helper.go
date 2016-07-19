@@ -1,4 +1,4 @@
-package common
+package scraper
 
 import (
 	"bytes"
@@ -95,24 +95,6 @@ func ResizeAndWrite(filename string, data []byte, writer io.Writer, maxWidth uin
 	}
 
 	return err
-}
-
-func detectContentType(data []byte) string {
-	httpType := http.DetectContentType(data)
-	if httpType == "image/png" {
-		return "png"
-	} else if httpType == "image/jpeg" {
-		return "jpg"
-	}
-	return ""
-}
-
-func loadJpeg(data []byte) (image.Image, error) {
-	return jpeg.Decode(bytes.NewReader(data))
-}
-
-func loadPng(data []byte) (image.Image, error) {
-	return png.Decode(bytes.NewReader(data))
 }
 
 // Download downlads the given url and saves it to
@@ -216,6 +198,26 @@ func CompareFilename(first string, second string) float32 {
 	missingPercentage := computePercentage(second, first, true)
 
 	return havingPercentage - (missingPercentage / 10.0)
+}
+
+// ----------------------
+
+func detectContentType(data []byte) string {
+	httpType := http.DetectContentType(data)
+	if httpType == "image/png" {
+		return "png"
+	} else if httpType == "image/jpeg" {
+		return "jpg"
+	}
+	return ""
+}
+
+func loadJpeg(data []byte) (image.Image, error) {
+	return jpeg.Decode(bytes.NewReader(data))
+}
+
+func loadPng(data []byte) (image.Image, error) {
+	return png.Decode(bytes.NewReader(data))
 }
 
 // Compute the percentage of words matching : how many words are in second that exists in first.

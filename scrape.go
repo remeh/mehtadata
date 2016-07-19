@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"common"
 	"db"
 	"model"
+	"scraper"
 	"thegamesdb"
 )
 
@@ -115,7 +115,7 @@ func scrape(flags Flags, platformName string, platformId int, dir, extensions, o
 		if len(gameinfo.Title) > 0 {
 			fmt.Printf("For '%s', scraped : '%s' on '%s'\n", filename, gameinfo.Title, gameinfo.Platform)
 		} else {
-			common.FillDefaults(dir, filename, &gameinfo)
+			scraper.FillDefaults(dir, filename, &gameinfo)
 			fmt.Printf("Nothing found for '%s'\n", filename)
 		}
 		gamesinfo.AddGame(gameinfo)

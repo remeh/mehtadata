@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"common"
+	"scraper"
 )
 
 // TODO(remy): could hit TheGamesDB for a real
@@ -44,7 +44,7 @@ Mandatory infos:
 	}
 	file.Close()
 
-	gamesinfo, err := common.Decode(gamelist)
+	gamesinfo, err := scraper.Decode(gamelist)
 	if err != nil {
 		return err
 	}
