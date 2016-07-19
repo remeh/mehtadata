@@ -3,10 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 // Options given to the CLI
@@ -33,34 +30,6 @@ func ParseFlags() Flags {
 	flag.Parse()
 
 	return flags
-}
-
-func lookForFiles(directory string, extensions []string) []string {
-	results := make([]string, 0)
-
-	// list files in the directory
-	fileinfos, err := ioutil.ReadDir(directory)
-	if err != nil {
-		return results
-	}
-
-	// for every files existing in the directory
-	for _, fileinfo := range fileinfos {
-		// don't mind of directories and check that the extension is valid for this scrape session.
-		name := fileinfo.Name()
-		if !fileinfo.IsDir() {
-			// Check extensions
-			extension := strings.ToLower(filepath.Ext(name))
-			for _, e := range extensions {
-				if extension == strings.ToLower(e) {
-					results = append(results, name)
-					break
-				}
-			}
-		}
-	}
-
-	return results
 }
 
 func main() {

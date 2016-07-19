@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -122,4 +124,32 @@ func scrape(flags Flags, platformName string, platformId int, dir, extensions, o
 	// writes executables info
 	db.WriteDatabase(flags.DestSqlite, platformId, gamesinfo)
 	return 0, nil
+}
+
+func lookForFiles(directory string, extensions []string) []string {
+	results := make([]string, 0)
+
+	// list files in the directory
+	fileinfos, err := ioutil.ReadDir(directory)
+	if err != nil {
+		return results
+	}
+
+	// for every files existing in the directory
+	for _, fileinfo := range fileinfos {
+		// don't mind of directories and check that the extension is valid for this scrape session.
+		name := fileinfo.Name()
+		if !fileinfo.IsDir() {
+			// Check extensions
+			extension := strings.ToLower(filepath.Ext(name))
+			for _, e := range extensions {
+				if extension == strings.ToLower(e) {
+					results = append(results, name)
+					break
+				}
+			}
+		}
+	}
+
+	return results
 }
