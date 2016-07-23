@@ -20,7 +20,7 @@ type Flags struct {
 func ParseFlags() Flags {
 	flags := Flags{}
 
-	flag.StringVar(&(flags.DestSqlite), "meh-db", "database.db", "If destination is mehstation, the mehstation database write in.")
+	flag.StringVar(&(flags.DestSqlite), "db", "database.db", "If destination is mehstation, the mehstation database write in.")
 
 	flag.BoolVar(&(flags.InputGamelist), "import-es", false, "Import an EmulationStation gamelist.xml file.")
 	flag.BoolVar(&(flags.ShowPlatforms), "show-platforms", false, "Display all TheGamesDB supported platforms")
