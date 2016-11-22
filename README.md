@@ -1,7 +1,7 @@
 # How-to install
 
+Go >= 1.7 recommended.
+
 ```
-go get -u github.com/mattn/gom
-gom install
-gom build
+go build
 ```

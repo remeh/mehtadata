@@ -1,13 +1,13 @@
 package main
 
 import (
-	"db"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 
-	"scraper"
+	"github.com/remeh/mehtadata/db"
+	"github.com/remeh/mehtadata/scraper"
 )
 
 // TODO(remy): could hit TheGamesDB for a real

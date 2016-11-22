@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"db"
-	"model"
+	"github.com/remeh/mehtadata/db"
+	"github.com/remeh/mehtadata/model"
 )
 
 func NewPlatform(flags Flags) (int64, error) {

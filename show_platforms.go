@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"thegamesdb"
+
+	"github.com/remeh/mehtadata/thegamesdb"
 )
 
 // TODO(remy): could hit TheGamesDB for a real

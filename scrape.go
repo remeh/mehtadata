@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
-	"db"
-	"model"
-	"scraper"
-	"thegamesdb"
+	"github.com/remeh/mehtadata/db"
+	"github.com/remeh/mehtadata/model"
+	"github.com/remeh/mehtadata/scraper"
+	"github.com/remeh/mehtadata/thegamesdb"
 )
 
 // Scraping launches the scraping for

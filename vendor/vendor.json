@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "jZwFA3+XVvrCNd55YOVgY4kWpuw=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "10876d7dac65f02064c03d7372a2f1dfb90043fe",
+			"revisionTime": "2016-03-07T09:57:06Z"
+		},
+		{
+			"checksumSHA1": "vUcHzx0aV5Vid+r3FyGE1Y7QkHs=",
+			"path": "github.com/mattn/go-sqlite3/sqlite3_test",
+			"revision": "10876d7dac65f02064c03d7372a2f1dfb90043fe",
+			"revisionTime": "2016-03-07T09:57:06Z"
+		},
+		{
+			"checksumSHA1": "OsI9X8jgra7e876X20RzYVTVN9k=",
+			"path": "github.com/nfnt/resize",
+			"revision": "8f4493144849aa7855fc525f5953c439180e6f25",
+			"revisionTime": "2014-12-17T10:23:53Z"
+		}
+	],
+	"rootPath": "github.com/remeh/mehtadata"
+}
