@@ -14,6 +14,7 @@ type Flags struct {
 	InputGamelist bool // gamelist.xml file
 	Scrape        bool
 	NewPlatform   bool // name of a new platform to create
+	InitSchema    bool
 }
 
 // ParseFlags parses the CLI options.
@@ -26,6 +27,7 @@ func ParseFlags() Flags {
 	flag.BoolVar(&(flags.ShowPlatforms), "show-platforms", false, "Display all TheGamesDB supported platforms")
 	flag.BoolVar(&(flags.NewPlatform), "new-platform", false, "To create a new platform.")
 	flag.BoolVar(&(flags.Scrape), "scrape", false, "To scrape content for a platform.")
+	flag.BoolVar(&(flags.InitSchema), "init", false, "Init the schema")
 
 	flag.Parse()
 
@@ -79,6 +81,16 @@ func main() {
 			os.Exit(1)
 		}
 		os.Exit(0)
+	}
+
+	if flags.InitSchema {
+		if done, err := InitSchema(flags); err != nil {
+			fmt.Println("Error:", err.Error())
+			os.Exit(1)
+		} else {
+			fmt.Println("Init schema:", done)
+			os.Exit(1)
+		}
 	}
 
 	flag.PrintDefaults()

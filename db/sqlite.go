@@ -1,14 +1,71 @@
 package db
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	"github.com/remeh/mehtadata/model"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+func InitSchema(database, filename string) (bool, error) {
+
+	// database
+	// ----------------------
+
+	var err error
+
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// read the schema
+	// ----------------------
+
+	var data []byte
+
+	if data, err = ioutil.ReadFile(filename); err != nil {
+		return false, err
+	}
+
+	// remove all line return
+
+	data = bytes.Replace(data, []byte("\n"), []byte(" "), -1)
+	data = bytes.Replace(data, []byte("\r"), []byte(" "), -1) // windows user having edited the file
+
+	queries := strings.Split(string(data), ";")
+
+	// prepares the transaction
+	// ----------------------
+
+	tx, err := db.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	// execute each line
+	// ----------------------
+
+	for _, query := range queries {
+		if _, err := tx.Exec(query); err != nil {
+			return false, err
+		}
+	}
+
+	// commit
+	// ----------------------
+
+	err = tx.Commit()
+
+	return err == nil, err
+}
 
 // CreatePlatform creates an empty platform in the given sqlite database.
 // Returns the ID of the newly created platform.
