@@ -80,6 +80,24 @@ func CreatePlatform(database string, platform model.Platform) (int64, error) {
 	}
 	defer db.Close()
 
+	// ensure that no platform with the same name
+	// is already existing
+	// ----------------------
+
+	var i int
+	if err := db.QueryRow(`
+		SELECT count(*)
+		FROM "platform"
+		WHERE
+			name = ?
+	`, platform.Name).Scan(&i); err != nil {
+		return -1, err
+	}
+
+	if i >= 1 {
+		return -1, nil
+	}
+
 	// prepares the transaction
 	// ----------------------
 
