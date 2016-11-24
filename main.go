@@ -12,9 +12,10 @@ type Flags struct {
 
 	ShowPlatforms bool // To show the list of available platforms.
 	InputGamelist bool // gamelist.xml file
-	Scrape        bool
-	NewPlatform   bool // name of a new platform to create
-	InitSchema    bool
+	Scrape        bool // to launch the scraper
+	NewPlatform   bool // new platform
+	NewExecutable bool // new executbale
+	InitSchema    bool // to run a .sql file
 }
 
 // ParseFlags parses the CLI options.
@@ -26,6 +27,7 @@ func ParseFlags() Flags {
 	flag.BoolVar(&(flags.InputGamelist), "import-es", false, "Import an EmulationStation gamelist.xml file.")
 	flag.BoolVar(&(flags.ShowPlatforms), "show-platforms", false, "Display all TheGamesDB supported platforms")
 	flag.BoolVar(&(flags.NewPlatform), "new-platform", false, "To create a new platform.")
+	flag.BoolVar(&(flags.NewExecutable), "new-exec", false, "To create a new executable.")
 	flag.BoolVar(&(flags.Scrape), "scrape", false, "To scrape content for a platform.")
 	flag.BoolVar(&(flags.InitSchema), "init", false, "Init the schema")
 
@@ -53,11 +55,26 @@ func main() {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		} else {
-			switch {
-			case rc >= 0:
+			if rc >= 0 {
 				fmt.Println("Platform created.")
-			default:
+			} else {
 				fmt.Println("Existing platform.")
+			}
+		}
+		os.Exit(0)
+	}
+
+	// Create executable
+	// ----------------------
+	if flags.NewExecutable {
+		if _, existing, err := NewExecutable(flags); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		} else {
+			if !existing {
+				fmt.Println("Executable created.")
+			} else {
+				fmt.Println("Executable updated.")
 			}
 		}
 		os.Exit(0)
@@ -88,6 +105,9 @@ func main() {
 		}
 		os.Exit(0)
 	}
+
+	// Run .SQL files
+	// ----------------------
 
 	if flags.InitSchema {
 		if done, err := InitSchema(flags); err != nil {

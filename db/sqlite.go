@@ -129,6 +129,101 @@ func CreatePlatform(database string, platform model.Platform) (int64, error) {
 	return id, nil
 }
 
+// CreateExecutable creates the executable in the database.
+// Returns the ID of the created executable.
+func CreateExecutable(database string, platformName string, executable model.Executable) (int64, bool, error) {
+
+	// database
+	// ----------------------
+
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// ensure that the platform with the given name exists
+	// and retrieve its ID.
+	// ----------------------
+
+	var platformId int
+	if err := db.QueryRow(`
+		SELECT "id" 
+		FROM "platform"
+		WHERE
+			name = ?
+	`, platformName).Scan(&platformId); err == sql.ErrNoRows {
+		return -1, false, fmt.Errorf("Unknown platform")
+	} else if err != nil {
+		return -1, false, err
+	}
+
+	// checks whether this executable already exists
+	// ----------------------
+
+	var c int
+	if err := db.QueryRow(`
+		SELECT COUNT(*)
+		FROM "executable"
+		JOIN "platform"
+			ON "platform"."id" = "executable"."platform_id"
+		WHERE
+			"platform"."name" = ?
+			AND
+			"executable"."filepath" = ?
+	`, platformName, executable.Filepath).Scan(&c); err != nil {
+		return -1, false, err
+	}
+
+	exists := false
+	if c != 0 {
+		exists = true
+	}
+
+	// executes the query
+	// ----------------------
+
+	var result sql.Result
+
+	if !exists {
+		result, err = db.Exec(`
+		INSERT INTO "executable"
+		("display_name", "filepath", "platform_id", "description", "genres", "publisher", "developer", "release_date", "players", "rating")
+		VALUES
+		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, executable.Name, executable.Filepath, platformId, executable.Description, executable.Genres, executable.Publisher, executable.Developer, executable.ReleaseDate, executable.Players, executable.Rating)
+	} else {
+		result, err = db.Exec(`
+		UPDATE "executable"
+		SET
+			"display_name" = ?,
+			"description" = ?,
+			"genres" = ?,
+			"publisher" = ?,
+			"developer" = ?,
+			"release_date" = ?,
+			"players" = ?,
+			"rating" = ?
+		WHERE
+			"executable"."platform_id" = ?
+			AND
+			"executable"."filepath" = ?
+	`, executable.Name, executable.Description, executable.Genres, executable.Publisher, executable.Developer, executable.ReleaseDate, executable.Players, executable.Rating, platformId, executable.Filepath)
+	}
+
+	if err != nil {
+		return -1, false, fmt.Errorf("[err] Can't create/update a new executable %s in the DB: %s", executable.Name, err.Error())
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return -1, false, fmt.Errorf("[err] During id retrieving of '%s': %s", executable.Name, err.Error())
+	}
+
+	return id, exists, nil
+
+}
+
 // writeDatabase writes the result of the scraping into the given database.
 func WriteDatabase(database string, platform int, gamesInfo *model.Gamesinfo) {
 	db, err := sql.Open("sqlite3", database)
