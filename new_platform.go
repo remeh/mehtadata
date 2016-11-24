@@ -8,7 +8,7 @@ import (
 	"github.com/remeh/mehtadata/model"
 )
 
-func NewPlatform(flags Flags) (int64, error) {
+func NewPlatform(flags Flags) (int64, bool, error) {
 	// try to read in the env var if
 	// everything is available
 
@@ -47,7 +47,7 @@ Not mandatory:
 	ICON      : absolute path to the icon image to use for this platform.
 	BG        : absolute path to the background image to use for this platform.
 		`)
-		return -1, fmt.Errorf("Missing fields.")
+		return -1, false, fmt.Errorf("Missing fields.")
 	}
 
 	platform := model.Platform{

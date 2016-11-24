@@ -69,7 +69,7 @@ func InitSchema(database, filename string) (bool, error) {
 
 // CreatePlatform creates an empty platform in the given sqlite database.
 // Returns the ID of the newly created platform.
-func CreatePlatform(database string, platform model.Platform) (int64, error) {
+func CreatePlatform(database string, platform model.Platform) (int64, bool, error) {
 
 	// database
 	// ----------------------
@@ -91,42 +91,46 @@ func CreatePlatform(database string, platform model.Platform) (int64, error) {
 		WHERE
 			name = ?
 	`, platform.Name).Scan(&i); err != nil {
-		return -1, err
+		return -1, false, err
 	}
 
+	exists := false
 	if i >= 1 {
-		return -1, nil
-	}
-
-	// prepares the transaction
-	// ----------------------
-
-	tx, err := db.Begin()
-	if err != nil {
-		return -1, err
-	}
-
-	execStmt, err := tx.Prepare(`insert into "platform" ("name", "command", "icon", "background", "type", "discover_dir", "discover_ext") values(?, ?, ?, ?, ?, ?, ?)`)
-	if err != nil {
-		return -1, err
+		exists = true
 	}
 
 	// executes the query
 	// ----------------------
 
-	result, err := execStmt.Exec(platform.Name, platform.Command, platform.Icon, platform.Background, platform.Type, platform.DiscoverDir, platform.DiscoverExts)
-	tx.Commit()
+	var result sql.Result
+
+	if !exists {
+		result, err = db.Exec(`insert into "platform" ("name", "command", "icon", "background", "type", "discover_dir", "discover_ext") values(?, ?, ?, ?, ?, ?, ?)`, platform.Name, platform.Command, platform.Icon, platform.Background, platform.Type, platform.DiscoverDir, platform.DiscoverExts)
+	} else {
+		result, err = db.Exec(`
+			UPDATE "platform"
+			SET
+				"command" = ?,
+				"icon" = ?,
+				"background" = ?,
+				"type" = ?,
+				"discover_dir" = ?,
+				"discover_ext" = ?
+			WHERE
+				"name" = ?
+		`, platform.Command, platform.Icon, platform.Background, platform.Type, platform.DiscoverDir, platform.DiscoverExts, platform.Name)
+	}
 
 	if err != nil {
-		return -1, fmt.Errorf("[err] Can't create a new platform %s in the DB: %s", platform.Name, err.Error())
+		return -1, false, fmt.Errorf("[err] Can't create a new platform %s in the DB: %s", platform.Name, err.Error())
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return -1, fmt.Errorf("[err] Can't create a new platform %s in the DB (id retrieving): %s", platform.Name, err.Error())
+		return -1, false, fmt.Errorf("[err] Can't create a new platform %s in the DB (id retrieving): %s", platform.Name, err.Error())
 	}
 
-	return id, nil
+	return id, exists, nil
 }
 
 // CreateExecutable creates the executable in the database.

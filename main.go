@@ -51,14 +51,14 @@ func main() {
 	// ----------------------
 
 	if flags.NewPlatform {
-		if rc, err := NewPlatform(flags); err != nil {
+		if _, exists, err := NewPlatform(flags); err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		} else {
-			if rc >= 0 {
-				fmt.Println("Platform created.")
+			if !exists {
+				fmt.Println("Platform created")
 			} else {
-				fmt.Println("Existing platform.")
+				fmt.Println("Platform updated")
 			}
 		}
 		os.Exit(0)
@@ -66,15 +66,16 @@ func main() {
 
 	// Create executable
 	// ----------------------
+
 	if flags.NewExecutable {
 		if _, existing, err := NewExecutable(flags); err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		} else {
 			if !existing {
-				fmt.Println("Executable created.")
+				fmt.Println("Executable created")
 			} else {
-				fmt.Println("Executable updated.")
+				fmt.Println("Executable updated")
 			}
 		}
 		os.Exit(0)
