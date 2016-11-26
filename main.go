@@ -15,6 +15,7 @@ type Flags struct {
 	Scrape        bool // to launch the scraper
 	NewPlatform   bool // new platform
 	NewExecutable bool // new executbale
+	DelExecutable bool // delete an executable
 	InitSchema    bool // to run a .sql file
 }
 
@@ -27,6 +28,7 @@ func ParseFlags() Flags {
 	flag.BoolVar(&(flags.InputGamelist), "import-es", false, "Import an EmulationStation gamelist.xml file.")
 	flag.BoolVar(&(flags.ShowPlatforms), "show-platforms", false, "Display all TheGamesDB supported platforms")
 	flag.BoolVar(&(flags.NewPlatform), "new-platform", false, "To create a new platform.")
+	flag.BoolVar(&(flags.DelExecutable), "del-exec", false, "To delete an executable")
 	flag.BoolVar(&(flags.NewExecutable), "new-exec", false, "To create a new executable.")
 	flag.BoolVar(&(flags.Scrape), "scrape", false, "To scrape content for a platform.")
 	flag.BoolVar(&(flags.InitSchema), "init", false, "Init the schema")
@@ -76,6 +78,23 @@ func main() {
 				fmt.Println("Executable created")
 			} else {
 				fmt.Println("Executable updated")
+			}
+		}
+		os.Exit(0)
+	}
+
+	// Delete an executable
+	// ----------------------
+
+	if flags.DelExecutable {
+		if deleted, err := DelExecutable(flags); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		} else {
+			if !deleted {
+				fmt.Println("Executable not deleted")
+			} else {
+				fmt.Println("Executable deleted")
 			}
 		}
 		os.Exit(0)

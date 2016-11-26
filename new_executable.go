@@ -25,12 +25,12 @@ func NewExecutable(flags Flags) (int64, bool, error) {
 
 	ok := false
 
-	if StringsHasContent(name, filepath) {
+	if StringsHasContent(platformName, name, filepath) {
 		ok = true
 	}
 
 	if !ok {
-		fmt.Println(`Can't create a new platform.
+		fmt.Println(`Can't create a new executable.
 Mandatory infos:
 	NAME          : name of the executable to create
 	FILEPATH      : filepath to the executable to start
