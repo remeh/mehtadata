@@ -133,6 +133,72 @@ func CreatePlatform(database string, platform model.Platform) (int64, bool, erro
 	return id, exists, nil
 }
 
+// DeletePlatform deletes the given platform by its name and
+// all its executables.
+func DeletePlatform(database, platformName string) (bool, error) {
+
+	// database
+	// ----------------------
+
+	var err error
+
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// ensure that the platform with the given name exists
+	// and retrieve its ID.
+	// ----------------------
+
+	var platformId int
+	if err := db.QueryRow(`
+		SELECT "id"
+		FROM "platform"
+		WHERE
+			name = ?
+	`, platformName).Scan(&platformId); err == sql.ErrNoRows {
+		return false, fmt.Errorf("Unknown platform")
+	} else if err != nil {
+		return false, err
+	}
+
+	// delete all its executables
+	// ----------------------
+
+	var result sql.Result
+
+	if result, err = db.Exec(`
+		DELETE FROM "executable"
+		WHERE
+			"platform_id" = ?
+	`, platformId); err != nil {
+		return false, err
+	}
+
+	// delete the platform
+	// ----------------------
+
+	if result, err = db.Exec(`
+		DELETE FROM "platform"
+		WHERE
+			"id" = ?
+	`, platformId); err != nil {
+		return false, err
+	}
+
+	// checks the deletion
+	// ----------------------
+
+	c, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("while checking for delection: %v", err.Error())
+	}
+
+	return c == 1, nil
+}
+
 // DeleteExecutable deletes the executable from the database.
 func DeleteExecutable(database, platformName, filepath string) (bool, error) {
 

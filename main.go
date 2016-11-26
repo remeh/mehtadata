@@ -14,6 +14,7 @@ type Flags struct {
 	InputGamelist bool // gamelist.xml file
 	Scrape        bool // to launch the scraper
 	NewPlatform   bool // new platform
+	DelPlatform   bool // delete a platform
 	NewExecutable bool // new executbale
 	DelExecutable bool // delete an executable
 	InitSchema    bool // to run a .sql file
@@ -28,6 +29,7 @@ func ParseFlags() Flags {
 	flag.BoolVar(&(flags.InputGamelist), "import-es", false, "Import an EmulationStation gamelist.xml file.")
 	flag.BoolVar(&(flags.ShowPlatforms), "show-platforms", false, "Display all TheGamesDB supported platforms")
 	flag.BoolVar(&(flags.NewPlatform), "new-platform", false, "To create a new platform.")
+	flag.BoolVar(&(flags.DelPlatform), "del-platform", false, "Delete a platform and all its executables")
 	flag.BoolVar(&(flags.DelExecutable), "del-exec", false, "To delete an executable")
 	flag.BoolVar(&(flags.NewExecutable), "new-exec", false, "To create a new executable.")
 	flag.BoolVar(&(flags.Scrape), "scrape", false, "To scrape content for a platform.")
@@ -78,6 +80,23 @@ func main() {
 				fmt.Println("Executable created")
 			} else {
 				fmt.Println("Executable updated")
+			}
+		}
+		os.Exit(0)
+	}
+
+	// Delete a platform
+	// ----------------------
+
+	if flags.DelPlatform {
+		if deleted, err := DelPlatform(flags); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		} else {
+			if !deleted {
+				fmt.Println("Platform not deleted")
+			} else {
+				fmt.Println("Platform deleted")
 			}
 		}
 		os.Exit(0)
