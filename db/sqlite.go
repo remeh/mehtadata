@@ -213,6 +213,61 @@ func DeletePlatform(database, platformName string) (bool, error) {
 	return c == 1, nil
 }
 
+func CreateResource(database, resource, filepath, platformName, typ string) (bool, error) {
+	// database
+	// ----------------------
+
+	var err error
+
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// gets the executable ID
+	// ----------------------
+
+	var executableId int
+	if err = db.QueryRow(`
+		SELECT "executable"."id" FROM "executable"
+		JOIN "platform"
+			ON "platform"."name" = ?
+			AND "executable"."platform_id" = "platform"."id"
+		WHERE
+			"executable"."filepath" = ?
+		LIMIT 1
+	`, platformName, filepath).Scan(&executableId); err == sql.ErrNoRows {
+		return false, fmt.Errorf("Unknown executable")
+	} else if err != nil {
+		return false, err
+	}
+
+	// insert the resource
+	// ----------------------
+
+	var result sql.Result
+
+	if result, err = db.Exec(`
+		INSERT INTO "executable_resource"
+		("executable_id", "type", "filepath")
+		VALUES
+		(?, ?, ?)
+	`, executableId, typ, resource); err != nil {
+		return false, err
+	}
+
+	// checks the insertion
+	// ----------------------
+
+	c, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("while checking for insertion: %v", err.Error())
+	}
+
+	return c >= 1, nil
+}
+
 // DeleteExecutable deletes the executable from the database.
 func DeleteExecutable(database, platformName, filepath string) (bool, error) {
 
@@ -263,8 +318,6 @@ func DeleteExecutable(database, platformName, filepath string) (bool, error) {
 
 	// delete the executable
 	// ----------------------
-
-	var result sql.Result
 
 	if result, err = db.Exec(`
 		DELETE FROM "executable"

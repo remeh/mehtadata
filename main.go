@@ -17,6 +17,7 @@ type Flags struct {
 	DelPlatform   bool // delete a platform
 	NewExecutable bool // new executbale
 	DelExecutable bool // delete an executable
+	NewRes        bool //  new resource
 	InitSchema    bool // to run a .sql file
 }
 
@@ -32,6 +33,7 @@ func ParseFlags() Flags {
 	flag.BoolVar(&(flags.DelPlatform), "del-platform", false, "Delete a platform and all its executables")
 	flag.BoolVar(&(flags.DelExecutable), "del-exec", false, "To delete an executable")
 	flag.BoolVar(&(flags.NewExecutable), "new-exec", false, "To create a new executable.")
+	flag.BoolVar(&(flags.NewRes), "new-res", false, "Create a new resource")
 	flag.BoolVar(&(flags.Scrape), "scrape", false, "To scrape content for a platform.")
 	flag.BoolVar(&(flags.InitSchema), "init", false, "Init the schema")
 
@@ -114,6 +116,23 @@ func main() {
 				fmt.Println("Executable not deleted")
 			} else {
 				fmt.Println("Executable deleted")
+			}
+		}
+		os.Exit(0)
+	}
+
+	// Create a new resource
+	// ----------------------
+
+	if flags.NewRes {
+		if created, err := NewResource(flags); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		} else {
+			if !created {
+				fmt.Println("Resource not created")
+			} else {
+				fmt.Println("Resource created")
 			}
 		}
 		os.Exit(0)
