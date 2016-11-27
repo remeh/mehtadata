@@ -164,10 +164,24 @@ func DeletePlatform(database, platformName string) (bool, error) {
 		return false, err
 	}
 
-	// delete all its executables
+	// delete all executables resources
 	// ----------------------
 
 	var result sql.Result
+
+	if result, err = db.Exec(`
+		DELETE FROM "executable_resource"
+		WHERE "executable_id" IN (
+			SELECT "id" FROM "executable"
+			WHERE
+				"platform_id" = ?
+		)
+	`, platformId); err != nil {
+		return false, err
+	}
+
+	// delete all its executables
+	// ----------------------
 
 	if result, err = db.Exec(`
 		DELETE FROM "executable"
@@ -226,6 +240,24 @@ func DeleteExecutable(database, platformName, filepath string) (bool, error) {
 	`, platformName).Scan(&platformId); err == sql.ErrNoRows {
 		return false, fmt.Errorf("Unknown platform")
 	} else if err != nil {
+		return false, err
+	}
+
+	// delete all executables resources
+	// ----------------------
+
+	var result sql.Result
+
+	if result, err = db.Exec(`
+		DELETE FROM "executable_resource"
+		WHERE "executable_id" IN (
+			SELECT "id" FROM "executable"
+			WHERE
+				"executable"."filepath" = ?
+				AND
+				"platform_id" = ?
+		)
+	`, filepath, platformId); err != nil {
 		return false, err
 	}
 
